@@ -108,7 +108,7 @@
             padding: 40px 25px;
             color: inherit;
             pointer-events: none;
-            /* Evitamos que el texto sea visible antes de la animación */
+            /* Se inicializa fuera de vista */
             transform: translateY(100vh);
         }
 
@@ -145,7 +145,7 @@
             font-size: 4rem;
             opacity: 0;
             z-index: 1000;
-            transition: opacity 0.5s ease;
+            transition: opacity 0.6s ease;
             filter: blur(1px);
             pointer-events: none;
         }
@@ -213,7 +213,7 @@
                 loader.style.opacity = 0.8;
                 setTimeout(() => { 
                     loader.style.opacity = 0; 
-                    setTimeout(generarMenu, 500);
+                    setTimeout(generarMenu, 600);
                 }, 1200);
             }, 500);
         }
@@ -256,7 +256,7 @@
             loader.style.opacity = 0.8;
             setTimeout(() => {
                 loader.style.opacity = 0;
-                setTimeout(generarMenu, 400);
+                setTimeout(generarMenu, 600);
             }, 1000);
         }
 
@@ -274,20 +274,20 @@
             const loader = document.getElementById('loader-corazones');
             const zonas = document.querySelectorAll('.zona-click');
 
+            // 1. Limpieza total inmediata
             if (animacionActual) animacionActual.cancel();
-            
-            // Limpieza inmediata
             textoEl.style.opacity = 0;
             textoEl.style.position = "absolute";
             textoEl.style.pointerEvents = "none";
             contImg.style.opacity = 0;
             viewport.scrollTop = 0;
+            zonas.forEach(z => z.style.display = 'none');
 
-            // Mostrar loader ANTES de preparar la carta
+            // 2. Aparecen los corazones primero (SOLOS)
             loader.style.opacity = 0.8;
 
             setTimeout(() => {
-                // Preparar contenido mientras el loader brilla
+                // Preparamos los datos en silencio
                 const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
                 document.body.style.backgroundColor = combo.bg;
                 document.body.style.color = combo.txt;
@@ -304,10 +304,11 @@
                     contImg.style.backgroundImage = `url('${carta.img}')`;
                 }
 
-                // Esperar a que el loader se apague para iniciar el movimiento
+                // 3. Desvanecemos loader y DISPARAMOS la carta
                 setTimeout(() => {
                     loader.style.opacity = 0;
                     
+                    // Esperamos a que el loader sea invisible para mostrar la carta
                     setTimeout(() => {
                         zonas.forEach(z => { z.style.display = 'block'; z.style.zIndex = "60"; });
                         if (carta.img) contImg.style.opacity = 0.4;
@@ -315,6 +316,7 @@
 
                         const duracion = ((textoEl.offsetHeight + viewport.offsetHeight) / 45) * 1000;
 
+                        // La animación arranca justo ahora
                         animacionActual = textoEl.animate([
                             { transform: `translateY(${viewport.offsetHeight}px)` }, 
                             { transform: `translateY(-${textoEl.offsetHeight}px)` }
@@ -327,9 +329,9 @@
                             viewport.style.webkitMaskImage = "none";
                             zonas.forEach(z => z.style.zIndex = "10");
                         };
-                    }, 400); // Pequeña pausa dramática tras el loader
-                }, 1000);
-            }, 400);
+                    }, 600); // Pausa post-loader
+                }, 1000); // Tiempo que los corazones brillan
+            }, 200);
         }
 
         cargarCartas();
