@@ -61,31 +61,35 @@
             transform: translateX(-50%);
             width: 90%; 
             max-width: 500px;
-            height: 65vh;
+            height: 70vh; /* Ajustado para mejor visibilidad */
             z-index: 5;
-            overflow-y: auto;
+            overflow-y: auto; /* Permite el scroll */
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
-            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+            /* Máscara suavizada */
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            scroll-behavior: smooth;
         }
 
+        /* Ocultar scrollbar pero mantener funcionalidad */
         #viewport-texto::-webkit-scrollbar { display: none; }
 
         #menu-cartas {
             display: none;
             flex-direction: column;
-            gap: 8px;
-            padding: 40px 10px;
+            gap: 12px;
+            padding: 80px 10px; /* Padding extra para que el degradado no tape el texto al inicio/final */
             width: 100%;
             opacity: 0;
             transition: opacity 1s ease;
             z-index: 20;
+            flex-shrink: 0;
         }
 
         .boton-carta {
-            padding: 10px 0;
+            padding: 12px 0;
             cursor: pointer;
             font-size: 1.1rem;
             transition: all 0.3s ease;
@@ -103,7 +107,7 @@
 
         .boton-carta:hover {
             opacity: 0.6;
-            padding-left: 5px;
+            padding-left: 8px;
         }
 
         #contenedor-texto { 
@@ -125,7 +129,7 @@
             text-align: center !important;
             width: 100% !important;
             opacity: 1 !important;
-            cursor: pointer; /* Indica que se puede clickear */
+            cursor: pointer;
             pointer-events: auto !important; 
         }
 
@@ -222,9 +226,8 @@
             } catch (e) { console.error("Error Sheets"); }
         }
 
-        // NUEVA FUNCIÓN: Se activa solo al dar click en la bienvenida
         function iniciarDesdeBienvenida() {
-            if (!datosListos) return; // Espera a que Sheets responda si el internet es lento
+            if (!datosListos) return;
             secuenciaEntrada();
         }
 
@@ -249,15 +252,19 @@
             const menuEl = document.getElementById('menu-cartas');
             const contImg = document.getElementById('contenedor-imagen');
             const textoEl = document.getElementById('contenedor-texto');
+            const viewport = document.getElementById('viewport-texto');
             
             document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
             if (animacionActual) animacionActual.cancel();
             
+            // Reset de estados
             interactuado = false;
             textoEl.style.opacity = 0;
             textoEl.style.display = 'none';
             contImg.style.opacity = 0;
             
+            // Limpiar y resetear scroll
+            viewport.scrollTop = 0;
             menuEl.innerHTML = ""; 
             menuEl.style.display = 'flex';
             
