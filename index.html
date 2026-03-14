@@ -60,15 +60,14 @@
             transform: translateX(-50%);
             width: 90%; 
             max-width: 500px;
-            height: 70vh;
-            z-index: 50; 
+            height: 70vh; 
+            z-index: 5;
             overflow-y: auto; 
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-            -webkit-overflow-scrolling: touch;
         }
 
         #viewport-texto::-webkit-scrollbar { display: none; }
@@ -76,18 +75,20 @@
         #menu-cartas {
             display: none;
             flex-direction: column;
-            gap: 4px; 
-            padding: 80px 10px; 
+            gap: 12px;
+            padding: 80px 10px;
             width: 100%;
             opacity: 0;
             transition: opacity 1s ease;
+            z-index: 20;
             flex-shrink: 0;
         }
 
         .boton-carta {
-            padding: 6px 0; 
+            padding: 12px 0;
             cursor: pointer;
             font-size: 1.1rem;
+            transition: all 0.3s ease;
             display: flex;
             align-items: baseline;
         }
@@ -101,24 +102,19 @@
         #contenedor-texto { 
             position: absolute;
             width: 100%;
-            text-align: left;
             font-size: 1.4rem; 
             line-height: 2.3; 
             opacity: 0;
             padding: 40px 25px;
             color: inherit;
-            pointer-events: none;
-            /* Se inicializa fuera de vista */
-            transform: translateY(100vh);
+            pointer-events: none; /* Cambia a auto al finalizar animación */
         }
 
         .bienvenida {
             position: absolute !important;
             top: 50% !important;
-            left: 0;
             transform: translateY(-50%) !important;
             text-align: center !important;
-            width: 100% !important;
             opacity: 1 !important;
             cursor: pointer;
             pointer-events: auto !important; 
@@ -127,7 +123,6 @@
         #footer {
             position: fixed;
             bottom: 20px;
-            left: 0;
             width: 100%;
             text-align: center;
             font-size: 0.65rem;
@@ -142,12 +137,11 @@
             position: fixed;
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 4rem;
+            font-size: 5rem;
             opacity: 0;
             z-index: 1000;
-            transition: opacity 0.6s ease;
-            filter: blur(1px);
-            pointer-events: none;
+            transition: opacity 0.4s ease;
+            filter: blur(2px);
         }
     </style>
 </head>
@@ -167,8 +161,8 @@
     </div>
 
     <footer id="footer">
-        this page is the lovechild of <a href="https://thesoundof.love" target="_blank" style="color:inherit">sound of love</a> and son of spergy<br>
-        ¿tienes un mensaje para mí? <a href="https://secreto.site/antzz7" target="_blank" style="color:inherit">aquí</a>, por favor
+        this page is the lovechild of <a href="https://thesoundof.love" target="_blank" style="color:inherit">sound of love</a><br>
+        ¿tienes un mensaje? <a href="https://secreto.site/antzz7" target="_blank" style="color:inherit">aquí</a>
     </footer>
 
     <script>
@@ -180,10 +174,8 @@
         let datosListos = false;
 
         const combinaciones = [
-            { bg: "#fce4ec", txt: "#ad1457" }, 
-            { bg: "#e8eaf6", txt: "#283593" }, 
-            { bg: "#e0f2f1", txt: "#00695c" }, 
-            { bg: "#f1f8e9", txt: "#33691e" }, 
+            { bg: "#fce4ec", txt: "#ad1457" }, { bg: "#e8eaf6", txt: "#283593" }, 
+            { bg: "#e0f2f1", txt: "#00695c" }, { bg: "#f1f8e9", txt: "#33691e" }, 
             { bg: "#fff3e0", txt: "#e65100" }
         ];
 
@@ -210,12 +202,9 @@
             bienvenidaEl.style.opacity = 0;
             setTimeout(() => {
                 bienvenidaEl.style.display = 'none';
-                loader.style.opacity = 0.8;
-                setTimeout(() => { 
-                    loader.style.opacity = 0; 
-                    setTimeout(generarMenu, 600);
-                }, 1200);
-            }, 500);
+                loader.style.opacity = 0.6;
+                setTimeout(() => { loader.style.opacity = 0; generarMenu(); }, 1500);
+            }, 800);
         }
 
         function generarMenu() {
@@ -223,6 +212,7 @@
             const viewport = document.getElementById('viewport-texto');
             document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
             
+            // Reset visual
             viewport.style.webkitMaskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
             viewport.style.maskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
             viewport.scrollTop = 0;
@@ -244,24 +234,23 @@
             document.getElementById('menu-cartas').style.opacity = 0;
             setTimeout(() => {
                 document.getElementById('menu-cartas').style.display = 'none';
+                document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'block');
                 cambiarCarta(0); 
             }, 500);
         }
 
         function regresarAlMenu() {
             if (animacionActual) animacionActual.cancel();
-            const loader = document.getElementById('loader-corazones');
             document.getElementById('contenedor-texto').style.opacity = 0;
             document.getElementById('contenedor-imagen').style.opacity = 0;
-            loader.style.opacity = 0.8;
+            document.getElementById('loader-corazones').style.opacity = 0.6;
             setTimeout(() => {
-                loader.style.opacity = 0;
-                setTimeout(generarMenu, 600);
-            }, 1000);
+                document.getElementById('loader-corazones').style.opacity = 0;
+                generarMenu();
+            }, 800);
         }
 
         function pausar() { if (animacionActual) animacionActual.pause(); msPresionado = Date.now(); }
-        
         function reanudar(dir) {
             if ((Date.now() - msPresionado) < 250) cambiarCarta(dir);
             else if (animacionActual) animacionActual.play();
@@ -271,67 +260,54 @@
             const textoEl = document.getElementById('contenedor-texto');
             const viewport = document.getElementById('viewport-texto');
             const contImg = document.getElementById('contenedor-imagen');
-            const loader = document.getElementById('loader-corazones');
-            const zonas = document.querySelectorAll('.zona-click');
 
-            // 1. Limpieza total inmediata
             if (animacionActual) animacionActual.cancel();
+            
+            // Reset para nueva carta
             textoEl.style.opacity = 0;
             textoEl.style.position = "absolute";
             textoEl.style.pointerEvents = "none";
-            contImg.style.opacity = 0;
+            viewport.style.webkitMaskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
             viewport.scrollTop = 0;
-            zonas.forEach(z => z.style.display = 'none');
-
-            // 2. Aparecen los corazones primero (SOLOS)
-            loader.style.opacity = 0.8;
+            contImg.style.opacity = 0;
 
             setTimeout(() => {
-                // Preparamos los datos en silencio
                 const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
                 document.body.style.backgroundColor = combo.bg;
                 document.body.style.color = combo.txt;
 
-                if (dir !== 0 || indiceActual === -1) {
-                    indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length;
-                }
-                
+                if (dir !== 0) indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length;
                 const carta = datosCartas[indiceActual];
+                
                 textoEl.innerText = carta.texto;
                 textoEl.style.display = 'block';
-                
                 if (carta.img) {
                     contImg.style.backgroundImage = `url('${carta.img}')`;
+                    contImg.style.opacity = 0.4;
                 }
 
-                // 3. Desvanecemos loader y DISPARAMOS la carta
+                document.getElementById('loader-corazones').style.opacity = 0.6;
+
                 setTimeout(() => {
-                    loader.style.opacity = 0;
+                    document.getElementById('loader-corazones').style.opacity = 0;
+                    textoEl.style.opacity = 1;
                     
-                    // Esperamos a que el loader sea invisible para mostrar la carta
-                    setTimeout(() => {
-                        zonas.forEach(z => { z.style.display = 'block'; z.style.zIndex = "60"; });
-                        if (carta.img) contImg.style.opacity = 0.4;
-                        textoEl.style.opacity = 1;
+                    const duracion = ((textoEl.offsetHeight + viewport.offsetHeight) / 50) * 1000;
 
-                        const duracion = ((textoEl.offsetHeight + viewport.offsetHeight) / 45) * 1000;
+                    animacionActual = textoEl.animate([
+                        { transform: `translateY(${viewport.offsetHeight}px)` }, 
+                        { transform: `translateY(-${textoEl.offsetHeight}px)` }
+                    ], { duration: duracion, easing: 'linear' });
 
-                        // La animación arranca justo ahora
-                        animacionActual = textoEl.animate([
-                            { transform: `translateY(${viewport.offsetHeight}px)` }, 
-                            { transform: `translateY(-${textoEl.offsetHeight}px)` }
-                        ], { duration: duracion, easing: 'linear' });
-
-                        animacionActual.onfinish = () => {
-                            textoEl.style.position = "relative";
-                            textoEl.style.transform = "none";
-                            textoEl.style.pointerEvents = "auto";
-                            viewport.style.webkitMaskImage = "none";
-                            zonas.forEach(z => z.style.zIndex = "10");
-                        };
-                    }, 600); // Pausa post-loader
-                }, 1000); // Tiempo que los corazones brillan
-            }, 200);
+                    animacionActual.onfinish = () => {
+                        textoEl.style.position = "relative";
+                        textoEl.style.transform = "none";
+                        textoEl.style.pointerEvents = "auto";
+                        // Quitamos el degradado para que el usuario lea libremente
+                        viewport.style.webkitMaskImage = "none";
+                    };
+                }, 1200);
+            }, 500);
         }
 
         cargarCartas();
