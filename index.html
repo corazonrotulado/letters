@@ -61,15 +61,13 @@
             width: 90%; 
             max-width: 500px;
             height: 70vh; 
-            z-index: 50; /* Prioridad máxima para el scroll */
+            z-index: 20; /* Subimos el z-index para que esté sobre las zonas de clic al final */
             overflow-y: auto; 
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-            /* Suavizar scroll en iOS */
-            -webkit-overflow-scrolling: touch;
         }
 
         #viewport-texto::-webkit-scrollbar { display: none; }
@@ -83,13 +81,13 @@
             opacity: 0;
             transition: opacity 1s ease;
             flex-shrink: 0;
-            pointer-events: auto;
         }
 
         .boton-carta {
             padding: 12px 0;
             cursor: pointer;
             font-size: 1.1rem;
+            transition: all 0.3s ease;
             display: flex;
             align-items: baseline;
         }
@@ -108,7 +106,7 @@
             opacity: 0;
             padding: 40px 25px;
             color: inherit;
-            pointer-events: none; /* Cambia a auto al final */
+            pointer-events: none;
         }
 
         .bienvenida {
@@ -131,12 +129,13 @@
             opacity: 0.7;
         }
 
+        /* ZONAS DE CLICK: Inicialmente en z-index 30 para controlar la animación */
         .zona-click { 
             position: fixed; 
             top: 0; 
             height: 100%; 
             width: 50%; 
-            z-index: 10; /* Detrás del viewport por defecto */
+            z-index: 30; 
             cursor: pointer; 
             display: none; 
         }
@@ -221,6 +220,8 @@
         function generarMenu() {
             const menuEl = document.getElementById('menu-cartas');
             const viewport = document.getElementById('viewport-texto');
+            
+            // Ocultar zonas de clic al estar en el menú
             document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
             
             viewport.style.webkitMaskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
@@ -262,8 +263,12 @@
         function pausar() { if (animacionActual) animacionActual.pause(); msPresionado = Date.now(); }
         
         function reanudar(dir) {
-            if ((Date.now() - msPresionado) < 250) cambiarCarta(dir);
-            else if (animacionActual) animacionActual.play();
+            // Si fue un clic rápido, cambia de carta
+            if ((Date.now() - msPresionado) < 250) {
+                cambiarCarta(dir);
+            } else if (animacionActual) {
+                animacionActual.play();
+            }
         }
 
         function cambiarCarta(dir) {
@@ -274,12 +279,16 @@
 
             if (animacionActual) animacionActual.cancel();
             
-            // Durante la animación, las zonas de clic están activas para pausar
-            zonas.forEach(z => z.style.display = 'block');
+            // 1. Zonas de clic al frente (z-index alto) para detectar el siguiente clic/pausa
+            zonas.forEach(z => {
+                z.style.display = 'block';
+                z.style.zIndex = "30";
+            });
 
             textoEl.style.opacity = 0;
             textoEl.style.position = "absolute";
             textoEl.style.pointerEvents = "none";
+            viewport.style.webkitMaskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
             viewport.scrollTop = 0;
             contImg.style.opacity = 0;
 
@@ -305,7 +314,7 @@
                     document.getElementById('loader-corazones').style.opacity = 0;
                     textoEl.style.opacity = 1;
                     
-                    const duracion = ((textoEl.offsetHeight + viewport.offsetHeight) / 45) * 1000;
+                    const duracion = ((textoEl.offsetHeight + viewport.offsetHeight) / 50) * 1000;
 
                     animacionActual = textoEl.animate([
                         { transform: `translateY(${viewport.offsetHeight}px)` }, 
@@ -313,15 +322,14 @@
                     ], { duration: duracion, easing: 'linear' });
 
                     animacionActual.onfinish = () => {
-                        // FINAL: Habilitamos scroll interno real
+                        // TERMINÓ EL TELEPROMPTER:
                         textoEl.style.position = "relative";
                         textoEl.style.transform = "none";
-                        textoEl.style.pointerEvents = "auto";
-                        viewport.style.webkitMaskImage = "none";
-                        viewport.style.maskImage = "none";
+                        textoEl.style.pointerEvents = "auto"; // El texto ahora recibe toques
+                        viewport.style.webkitMaskImage = "none"; // Quitamos máscara para ver todo
                         
-                        // Bajamos el z-index de las zonas de clic para no obstruir el scroll táctil
-                        zonas.forEach(z => z.style.zIndex = "1");
+                        // 2. Mandamos las zonas de clic ATRÁS para que no estorben al scroll
+                        zonas.forEach(z => z.style.zIndex = "10");
                     };
                 }, 1200);
             }, 500);
