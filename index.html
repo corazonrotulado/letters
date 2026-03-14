@@ -20,7 +20,6 @@
             -webkit-user-select: none;
         }
 
-        /* TEXTURA DE GRANO */
         body::after {
             content: "";
             position: fixed;
@@ -61,26 +60,23 @@
             transform: translateX(-50%);
             width: 90%; 
             max-width: 500px;
-            height: 70vh; /* Ajustado para mejor visibilidad */
+            height: 70vh; 
             z-index: 5;
-            overflow-y: auto; /* Permite el scroll */
+            overflow-y: auto; 
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            /* Máscara suavizada */
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-            scroll-behavior: smooth;
         }
 
-        /* Ocultar scrollbar pero mantener funcionalidad */
         #viewport-texto::-webkit-scrollbar { display: none; }
 
         #menu-cartas {
             display: none;
             flex-direction: column;
             gap: 12px;
-            padding: 80px 10px; /* Padding extra para que el degradado no tape el texto al inicio/final */
+            padding: 80px 10px;
             width: 100%;
             opacity: 0;
             transition: opacity 1s ease;
@@ -93,10 +89,8 @@
             cursor: pointer;
             font-size: 1.1rem;
             transition: all 0.3s ease;
-            text-align: left;
             display: flex;
             align-items: baseline;
-            pointer-events: auto;
         }
 
         .boton-carta span.numero {
@@ -105,21 +99,15 @@
             opacity: 0.5;
         }
 
-        .boton-carta:hover {
-            opacity: 0.6;
-            padding-left: 8px;
-        }
-
         #contenedor-texto { 
             position: absolute;
             width: 100%;
-            text-align: left;
             font-size: 1.4rem; 
             line-height: 2.3; 
             opacity: 0;
-            padding: 20px 25px;
+            padding: 40px 25px;
             color: inherit;
-            pointer-events: none;
+            pointer-events: none; /* Cambia a auto al finalizar animación */
         }
 
         .bienvenida {
@@ -127,7 +115,6 @@
             top: 50% !important;
             transform: translateY(-50%) !important;
             text-align: center !important;
-            width: 100% !important;
             opacity: 1 !important;
             cursor: pointer;
             pointer-events: auto !important; 
@@ -136,25 +123,15 @@
         #footer {
             position: fixed;
             bottom: 20px;
-            left: 0;
             width: 100%;
             text-align: center;
             font-size: 0.65rem;
-            letter-spacing: 0.3px;
             z-index: 100;
             opacity: 0.7;
-            line-height: 1.6;
-            transition: color 1.5s ease;
         }
 
-        #footer a {
-            color: inherit;
-            text-decoration: none;
-            border-bottom: 0.3px solid currentColor;
-            transition: opacity 0.3s ease;
-        }
-
-        #footer a:hover { opacity: 0.5; }
+        .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
+        .izq { left: 0; } .der { right: 0; }
 
         #loader-corazones {
             position: fixed;
@@ -163,14 +140,9 @@
             font-size: 5rem;
             opacity: 0;
             z-index: 1000;
-            transition: opacity 0.4s ease, color 1.5s ease;
-            filter: blur(2px) contrast(180%);
-            letter-spacing: 15px;
-            pointer-events: none;
+            transition: opacity 0.4s ease;
+            filter: blur(2px);
         }
-
-        .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
-        .izq { left: 0; } .der { right: 0; }
     </style>
 </head>
 <body>
@@ -189,25 +161,21 @@
     </div>
 
     <footer id="footer">
-        this page is the lovechild of <a href="https://thesoundof.love" target="_blank">sound of love</a> and son of spergy<br>
-        ¿tienes un mensaje para mí? <a href="https://secreto.site/antzz7" target="_blank">aquí</a>, por favor
+        this page is the lovechild of <a href="https://thesoundof.love" target="_blank" style="color:inherit">sound of love</a><br>
+        ¿tienes un mensaje? <a href="https://secreto.site/antzz7" target="_blank" style="color:inherit">aquí</a>
     </footer>
 
     <script>
         const S_ID = "1kDWsxPSkUCAYrhr2dUG1gujmiSGo2Crcf36D4TB75js"; 
         let datosCartas = [];
         let indiceActual = -1;
-        let interactuado = false;
         let animacionActual = null;
         let msPresionado = 0;
-        let estaPausado = false;
         let datosListos = false;
 
         const combinaciones = [
-            { bg: "#fce4ec", txt: "#ad1457" }, 
-            { bg: "#e8eaf6", txt: "#283593" }, 
-            { bg: "#e0f2f1", txt: "#00695c" }, 
-            { bg: "#f1f8e9", txt: "#33691e" }, 
+            { bg: "#fce4ec", txt: "#ad1457" }, { bg: "#e8eaf6", txt: "#283593" }, 
+            { bg: "#e0f2f1", txt: "#00695c" }, { bg: "#f1f8e9", txt: "#33691e" }, 
             { bg: "#fff3e0", txt: "#e65100" }
         ];
 
@@ -226,48 +194,31 @@
             } catch (e) { console.error("Error Sheets"); }
         }
 
-        function iniciarDesdeBienvenida() {
-            if (!datosListos) return;
-            secuenciaEntrada();
-        }
+        function iniciarDesdeBienvenida() { if (datosListos) secuenciaEntrada(); }
 
         function secuenciaEntrada() {
             const bienvenidaEl = document.getElementById('contenedor-texto');
             const loader = document.getElementById('loader-corazones');
-            
             bienvenidaEl.style.opacity = 0;
-            bienvenidaEl.style.pointerEvents = 'none';
-
             setTimeout(() => {
                 bienvenidaEl.style.display = 'none';
                 loader.style.opacity = 0.6;
-                setTimeout(() => {
-                    loader.style.opacity = 0;
-                    generarMenu();
-                }, 1500);
+                setTimeout(() => { loader.style.opacity = 0; generarMenu(); }, 1500);
             }, 800);
         }
 
         function generarMenu() {
             const menuEl = document.getElementById('menu-cartas');
-            const contImg = document.getElementById('contenedor-imagen');
-            const textoEl = document.getElementById('contenedor-texto');
             const viewport = document.getElementById('viewport-texto');
-            
             document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
-            if (animacionActual) animacionActual.cancel();
             
-            // Reset de estados
-            interactuado = false;
-            textoEl.style.opacity = 0;
-            textoEl.style.display = 'none';
-            contImg.style.opacity = 0;
-            
-            // Limpiar y resetear scroll
+            // Reset visual
+            viewport.style.webkitMaskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
+            viewport.style.maskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
             viewport.scrollTop = 0;
+
             menuEl.innerHTML = ""; 
             menuEl.style.display = 'flex';
-            
             datosCartas.forEach((carta, i) => {
                 const btn = document.createElement('div');
                 btn.className = 'boton-carta';
@@ -275,24 +226,7 @@
                 btn.onclick = (e) => { e.stopPropagation(); seleccionarCarta(i); };
                 menuEl.appendChild(btn);
             });
-            
             setTimeout(() => menuEl.style.opacity = 1, 50);
-        }
-
-        function regresarAlMenu() {
-            const loader = document.getElementById('loader-corazones');
-            const textoEl = document.getElementById('contenedor-texto');
-            const contImg = document.getElementById('contenedor-imagen');
-            
-            if (animacionActual) animacionActual.cancel();
-            textoEl.style.opacity = 0;
-            contImg.style.opacity = 0;
-
-            loader.style.opacity = 0.6;
-            setTimeout(() => {
-                loader.style.opacity = 0;
-                generarMenu();
-            }, 1000);
         }
 
         function seleccionarCarta(index) {
@@ -305,76 +239,75 @@
             }, 500);
         }
 
-        function pausar() {
-            if (animacionActual) { animacionActual.pause(); estaPausado = true; msPresionado = Date.now(); }
+        function regresarAlMenu() {
+            if (animacionActual) animacionActual.cancel();
+            document.getElementById('contenedor-texto').style.opacity = 0;
+            document.getElementById('contenedor-imagen').style.opacity = 0;
+            document.getElementById('loader-corazones').style.opacity = 0.6;
+            setTimeout(() => {
+                document.getElementById('loader-corazones').style.opacity = 0;
+                generarMenu();
+            }, 800);
         }
 
+        function pausar() { if (animacionActual) animacionActual.pause(); msPresionado = Date.now(); }
         function reanudar(dir) {
-            if ((Date.now() - msPresionado) < 250) { cambiarCarta(dir); } 
-            else if (animacionActual) { animacionActual.play(); }
-            estaPausado = false;
+            if ((Date.now() - msPresionado) < 250) cambiarCarta(dir);
+            else if (animacionActual) animacionActual.play();
         }
 
         function cambiarCarta(dir) {
             const textoEl = document.getElementById('contenedor-texto');
-            const contImg = document.getElementById('contenedor-imagen');
-            const loader = document.getElementById('loader-corazones');
             const viewport = document.getElementById('viewport-texto');
+            const contImg = document.getElementById('contenedor-imagen');
 
             if (animacionActual) animacionActual.cancel();
             
+            // Reset para nueva carta
             textoEl.style.opacity = 0;
-            contImg.style.opacity = 0;
+            textoEl.style.position = "absolute";
+            textoEl.style.pointerEvents = "none";
+            viewport.style.webkitMaskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
             viewport.scrollTop = 0;
+            contImg.style.opacity = 0;
 
             setTimeout(() => {
                 const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
                 document.body.style.backgroundColor = combo.bg;
                 document.body.style.color = combo.txt;
 
-                textoEl.innerText = "";
-                textoEl.classList.remove('bienvenida');
+                if (dir !== 0) indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length;
+                const carta = datosCartas[indiceActual];
+                
+                textoEl.innerText = carta.texto;
                 textoEl.style.display = 'block';
-                textoEl.style.position = "absolute";
+                if (carta.img) {
+                    contImg.style.backgroundImage = `url('${carta.img}')`;
+                    contImg.style.opacity = 0.4;
+                }
 
-                loader.style.opacity = 0.6;
+                document.getElementById('loader-corazones').style.opacity = 0.6;
 
                 setTimeout(() => {
-                    loader.style.opacity = 0;
-                    if (dir !== 0) { 
-                        indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length; 
-                    }
-
-                    const carta = datosCartas[indiceActual];
-                    textoEl.innerText = carta.texto;
-
-                    const alturaTexto = textoEl.offsetHeight || 500; 
-                    const pixelesPorSegundo = 50; 
-                    const duracionDinamica = ((alturaTexto + window.innerHeight) / pixelesPorSegundo) * 1200;
-
-                    if (carta.img) {
-                        contImg.style.backgroundImage = `url('${carta.img}')`;
-                        contImg.style.opacity = 0.5; 
-                    }
-
+                    document.getElementById('loader-corazones').style.opacity = 0;
                     textoEl.style.opacity = 1;
-                    interactuado = true;
+                    
+                    const duracion = ((textoEl.offsetHeight + viewport.offsetHeight) / 50) * 1000;
 
                     animacionActual = textoEl.animate([
-                        { transform: 'translateY(60vh)' }, 
-                        { transform: 'translateY(-120%)' }
-                    ], { 
-                        duration: duracionDinamica, 
-                        iterations: 1, 
-                        easing: 'linear' 
-                    });
+                        { transform: `translateY(${viewport.offsetHeight}px)` }, 
+                        { transform: `translateY(-${textoEl.offsetHeight}px)` }
+                    ], { duration: duracion, easing: 'linear' });
 
                     animacionActual.onfinish = () => {
                         textoEl.style.position = "relative";
                         textoEl.style.transform = "none";
+                        textoEl.style.pointerEvents = "auto";
+                        // Quitamos el degradado para que el usuario lea libremente
+                        viewport.style.webkitMaskImage = "none";
                     };
-                }, 1500);
-            }, 600);
+                }, 1200);
+            }, 500);
         }
 
         cargarCartas();
