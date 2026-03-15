@@ -10,245 +10,163 @@
         body, html { 
             margin: 0; padding: 0; height: 100%; width: 100%; 
             font-family: 'Playfair Display', serif; overflow: hidden; 
-            transition: background-color 1.5s ease, color 1.5s ease;
             background-color: #fce4ec; color: #ad1457;
-            user-select: none; -webkit-user-select: none;
+            transition: background-color 1.5s ease, color 1.5s ease;
         }
+
         body::after {
             content: ""; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
             background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
             opacity: 0.1; z-index: 999; pointer-events: none;
-            animation: grain-jump 0.6s steps(8) infinite;
         }
-        @keyframes grain-jump {
-            0%, 100% { transform: translate(0, 0); }
-            10% { transform: translate(-1%, -2%); }
-            50% { transform: translate(-3%, 1%); }
-        }
-        #contenedor-imagen {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; height: 85%; z-index: 1; opacity: 0; transition: opacity 1.5s ease;
-            background-size: contain; background-repeat: no-repeat; background-position: center;
-            mix-blend-mode: screen; filter: contrast(1.5) brightness(0.8) sepia(1) saturate(5);
-        }
+
         #viewport-texto {
             position: fixed; top: 12vh; left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 500px; height: 70vh; z-index: 5;
-            overflow-y: auto; overflow-x: hidden; display: flex; flex-direction: column;
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            display: flex; flex-direction: column; overflow: hidden;
         }
-        #viewport-texto::-webkit-scrollbar { display: none; }
-        #menu-cartas {
-            display: none; flex-direction: column; gap: 4px; padding: 80px 10px; 
-            width: 100%; opacity: 0; transition: opacity 1s ease; z-index: 20;
-        }
-        .boton-carta {
-            padding: 12px 0; cursor: pointer; font-size: 1.1rem; transition: all 0.3s ease;
-            text-align: left; display: flex; align-items: baseline;
-        }
-        .boton-carta span.numero { font-size: 0.8rem; margin-right: 15px; opacity: 0.5; }
-        .boton-carta:hover { opacity: 0.6; padding-left: 8px; }
+
         #contenedor-texto { 
             position: absolute; width: 100%; text-align: left; font-size: 1.4rem; 
-            line-height: 2.3; opacity: 0; padding: 20px 25px; color: inherit; pointer-events: none;
+            line-height: 2.3; opacity: 0; padding: 20px 25px; pointer-events: none;
+            white-space: pre-wrap;
         }
+
         .bienvenida {
             position: absolute !important; top: 50% !important; transform: translateY(-50%) !important;
-            text-align: center !important; width: 100% !important; opacity: 1 !important;
-            cursor: pointer; pointer-events: auto !important; 
+            text-align: center !important; opacity: 1 !important; cursor: pointer; pointer-events: auto !important; 
         }
-        #footer {
-            position: fixed; bottom: 20px; left: 0; width: 100%; text-align: center;
-            font-size: 0.65rem; letter-spacing: 0.3px; z-index: 100; opacity: 0.7;
-        }
-        #footer a { color: inherit; text-decoration: none; border-bottom: 0.3px solid currentColor; }
-        #loader-corazones {
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 5rem; opacity: 0; z-index: 1000; transition: opacity 0.4s ease;
-            filter: blur(2px) contrast(180%); letter-spacing: 15px; pointer-events: none;
-        }
-        .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
-        .izq { left: 0; } .der { right: 0; }
 
-        /* ESTILO CANGREJO */
         #contenedor-vuelo {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 9999; overflow: hidden; display: none;
+            pointer-events: none; z-index: 1000; overflow: hidden; display: none;
         }
+
         .palabra-voladora {
-            position: absolute; white-space: nowrap; font-size: 1.6rem; font-style: italic;
-            opacity: 0.9; color: inherit; animation: volar-izquierda linear forwards;
+            position: absolute; white-space: nowrap; font-size: 1.8rem; font-style: italic;
+            opacity: 0.9; color: inherit; animation: volar-izq linear forwards;
         }
-        @keyframes volar-izquierda {
+
+        @keyframes volar-izq {
             from { transform: translateX(110vw); }
             to { transform: translateX(-150%); }
         }
+
+        #menu-cartas { display: none; flex-direction: column; gap: 5px; padding: 80px 10px; width: 100%; z-index: 20; overflow-y: auto; height: 100%; }
+        #menu-cartas::-webkit-scrollbar { display: none; }
+        .boton-carta { padding: 12px 0; cursor: pointer; font-size: 1.1rem; text-align: left; border-bottom: 0.5px solid rgba(0,0,0,0.05); }
+        .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
+        .izq { left: 0; } .der { right: 0; }
     </style>
 </head>
 <body>
-    <div id="contenedor-imagen"></div>
+
     <div id="contenedor-vuelo"></div>
+
     <div id="controles-navegacion">
-        <div id="zona-regresar" class="zona-click izq" onclick="regresarAlMenu()"></div>
-        <div id="zona-siguiente" class="zona-click der" onmousedown="pausar()" onmouseup="reanudar(1)"></div>
+        <div class="zona-click izq" onclick="regresarAlMenu()"></div>
+        <div class="zona-click der" onclick="cambiarCarta(1)"></div>
     </div>
+
     <div id="viewport-texto">
-        <div id="loader-corazones">♥♥♥</div>
         <div id="menu-cartas"></div>
-        <div id="contenedor-texto" class="bienvenida" onclick="iniciarDesdeBienvenida()">todas mis palabras yacen aquí, <br> ¡sé gentil con ellas, por favor!</div>
+        <div id="contenedor-texto" class="bienvenida" onclick="iniciar()">todas mis palabras yacen aquí...</div>
     </div>
-    <footer id="footer">
-        this page is the lovechild of <a href="https://thesoundof.love" target="_blank">sound of love</a> and son of spergy<br>
-        ¿tienes un mensaje para mí? <a href="https://secreto.site/antzz7" target="_blank">aquí</a>, por favor
-    </footer>
 
     <script>
         const S_ID = "1kDWsxPSkUCAYrhr2dUG1gujmiSGo2Crcf36D4TB75js"; 
         let datosCartas = [];
         let indiceActual = -1;
         let animacionActual = null;
-        let msPresionado = 0;
-        let datosListos = false;
 
-        const combinaciones = [
-            { bg: "#fce4ec", txt: "#ad1457" }, { bg: "#e8eaf6", txt: "#283593" }, 
-            { bg: "#e0f2f1", txt: "#00695c" }, { bg: "#f1f8e9", txt: "#33691e" }, { bg: "#fff3e0", txt: "#e65100" }
-        ];
-
-        async function cargarCartas() {
-            const url = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:json`;
+        async function cargar() {
             try {
+                const url = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:json`;
                 const res = await fetch(url);
                 const t = await res.text();
                 const json = JSON.parse(t.substr(47).slice(0, -2));
-                const cols = json.table.cols;
-                
-                // Buscamos dinámicamente qué columna es cada cual por su nombre en la fila 1
-                const idxTexto = cols.findIndex(c => c.label.toLowerCase() === 'texto');
-                const idxImg = cols.findIndex(c => c.label.toLowerCase() === 'img');
-                const idxTitulo = cols.findIndex(c => c.label.toLowerCase() === 'titulo');
-                const idxVuelo = cols.findIndex(c => c.label.toLowerCase() === 'vuelo');
-
                 datosCartas = json.table.rows.map(row => ({
-                    texto: (idxTexto !== -1 && row.c[idxTexto]) ? row.c[idxTexto].v : "",
-                    img: (idxImg !== -1 && row.c[idxImg]) ? row.c[idxImg].v : null,
-                    titulo: (idxTitulo !== -1 && row.c[idxTitulo]) ? row.c[idxTitulo].v : "Sin título",
-                    vuelo: (idxVuelo !== -1 && row.c[idxVuelo]) ? String(row.c[idxVuelo].v) : null
+                    texto: row.c[0] ? String(row.c[0].v) : "",
+                    titulo: row.c[2] ? String(row.c[2].v) : "Sin título"
                 }));
-                datosListos = true;
-            } catch (e) { console.error("Error cargando Sheets"); }
+            } catch (e) { console.error("Error cargando datos"); }
         }
 
-        function lanzarVuelo(frasesString) {
-            const contVuelo = document.getElementById('contenedor-vuelo');
-            contVuelo.style.display = 'block';
-            contVuelo.innerHTML = '';
+        function lanzarVuelo(texto) {
+            const cont = document.getElementById('contenedor-vuelo');
+            cont.style.display = 'block';
+            cont.innerHTML = '';
+            // Separamos por guiones
+            const palabras = texto.split('-').map(p => p.trim()).filter(p => p !== "");
             
-            // Aquí es donde sucede la magia: separa por comas y crea elementos individuales
-            const frases = frasesString.split(',').map(f => f.trim()).filter(f => f !== "");
-            
-            frases.forEach((frase, i) => {
+            palabras.forEach((p, i) => {
                 setTimeout(() => {
                     const span = document.createElement('span');
                     span.className = 'palabra-voladora';
-                    span.innerText = frase;
-                    span.style.top = (Math.random() * 70 + 10) + "vh";
+                    span.innerText = p;
+                    span.style.top = (Math.random() * 60 + 20) + "vh";
                     const dur = Math.random() * 3 + 5;
                     span.style.animationDuration = dur + "s";
-                    contVuelo.appendChild(span);
+                    cont.appendChild(span);
                     setTimeout(() => span.remove(), dur * 1000);
-                }, i * 600); // Salen una por una con un pequeño retraso
+                }, i * 800);
             });
         }
 
         function cambiarCarta(dir) {
-            const textoEl = document.getElementById('contenedor-texto');
-            const contImg = document.getElementById('contenedor-imagen');
-            const loader = document.getElementById('loader-corazones');
-            const contVuelo = document.getElementById('contenedor-vuelo');
-
             if (animacionActual) animacionActual.cancel();
-            if (contVuelo) { contVuelo.style.display = 'none'; contVuelo.innerHTML = ''; }
+            const txtEl = document.getElementById('contenedor-texto');
+            const contVuelo = document.getElementById('contenedor-vuelo');
             
-            textoEl.style.opacity = 0;
-            contImg.style.opacity = 0;
+            txtEl.style.opacity = 0;
+            contVuelo.style.display = 'none';
+            contVuelo.innerHTML = '';
 
             setTimeout(() => {
-                const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
-                document.body.style.backgroundColor = combo.bg;
-                document.body.style.color = combo.txt;
-                textoEl.innerText = "";
-                textoEl.style.display = 'block';
-                loader.style.opacity = 0.6;
+                indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length;
+                const carta = datosCartas[indiceActual];
+                
+                // Normalizamos el título para que no falle por tildes o espacios
+                const tituloLimpio = carta.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-                setTimeout(() => {
-                    loader.style.opacity = 0;
-                    if (dir !== 0) indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length;
-                    
-                    const carta = datosCartas[indiceActual];
-                    const esEspecial = carta.titulo.toLowerCase().trim() === "corazón rotulado";
-
-                    if (esEspecial) {
-                        textoEl.innerText = ""; 
-                        if (carta.vuelo) lanzarVuelo(carta.vuelo);
-                    } else {
-                        textoEl.innerText = carta.texto;
-                    }
-
-                    if (carta.img) {
-                        contImg.style.backgroundImage = `url('${carta.img}')`;
-                        contImg.style.opacity = 0.5; 
-                    }
-
-                    textoEl.style.opacity = 1;
-                    const durDinamica = ((textoEl.offsetHeight + window.innerHeight) / 50) * 1200;
-                    animacionActual = textoEl.animate([{ transform: 'translateY(60vh)' }, { transform: 'translateY(-120%)' }], 
-                        { duration: durDinamica, iterations: 1, easing: 'linear' });
-                }, 1500);
-            }, 600);
-        }
-
-        // --- Funciones de soporte (No han cambiado) ---
-        function iniciarDesdeBienvenida() { if (datosListos) secuenciaEntrada(); }
-        function secuenciaEntrada() {
-            const b = document.getElementById('contenedor-texto');
-            const l = document.getElementById('loader-corazones');
-            b.style.opacity = 0; b.style.pointerEvents = 'none';
-            setTimeout(() => { b.style.display = 'none'; l.style.opacity = 0.6;
-                setTimeout(() => { l.style.opacity = 0; generarMenu(); }, 1500);
-            }, 800);
-        }
-        function generarMenu() {
-            const m = document.getElementById('menu-cartas');
-            const t = document.getElementById('contenedor-texto');
-            document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
-            t.style.display = 'none'; m.innerHTML = ""; m.style.display = 'flex';
-            datosCartas.forEach((c, i) => {
-                const btn = document.createElement('div'); btn.className = 'boton-carta';
-                btn.innerHTML = `<span class="numero">${(i + 1).toString().padStart(2, '0')}</span> ${c.titulo}`;
-                btn.onclick = () => seleccionarCarta(i); m.appendChild(btn);
-            });
-            setTimeout(() => m.style.opacity = 1, 50);
-        }
-        function seleccionarCarta(i) {
-            indiceActual = i; document.getElementById('menu-cartas').style.opacity = 0;
-            setTimeout(() => {
-                document.getElementById('menu-cartas').style.display = 'none';
-                document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'block');
-                cambiarCarta(0); 
+                // LA CONDICIÓN: Si el título es "corazon rotulado"
+                if (tituloLimpio === "corazon rotulado") {
+                    txtEl.innerText = ""; // Limpiamos el centro
+                    lanzarVuelo(carta.texto);
+                } else {
+                    txtEl.innerText = carta.texto;
+                    txtEl.style.opacity = 1;
+                    const dur = ((txtEl.offsetHeight + window.innerHeight) / 50) * 1200;
+                    animacionActual = txtEl.animate([{ transform: 'translateY(65vh)' }, { transform: 'translateY(-130%)' }], 
+                        { duration: dur, iterations: 1, easing: 'linear' });
+                }
             }, 500);
         }
-        function regresarAlMenu() {
-            const l = document.getElementById('loader-corazones');
-            if (animacionActual) animacionActual.cancel();
-            document.getElementById('contenedor-texto').style.opacity = 0;
-            document.getElementById('contenedor-imagen').style.opacity = 0;
-            l.style.opacity = 0.6; setTimeout(() => { l.style.opacity = 0; generarMenu(); }, 1000);
+
+        function iniciar() {
+            document.getElementById('contenedor-texto').style.display = 'none';
+            const m = document.getElementById('menu-cartas');
+            m.style.display = 'flex';
+            m.innerHTML = "";
+            datosCartas.forEach((c, i) => {
+                const b = document.createElement('div');
+                b.className = 'boton-carta';
+                b.innerText = c.titulo;
+                b.onclick = () => {
+                    indiceActual = i;
+                    m.style.display = 'none';
+                    document.querySelectorAll('.zona-click').forEach(z => z.style.display = 'block');
+                    cambiarCarta(0);
+                };
+                m.appendChild(b);
+            });
         }
-        function pausar() { if (animacionActual) animacionActual.pause(); msPresionado = Date.now(); }
-        function reanudar(dir) { if ((Date.now() - msPresionado) < 250) cambiarCarta(dir); else if (animacionActual) animacionActual.play(); }
-        cargarCartas();
+
+        function regresarAlMenu() {
+            location.reload();
+        }
+
+        cargar();
     </script>
 </body>
 </html>
