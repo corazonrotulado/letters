@@ -1,318 +1,383 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>corazón rotulado</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; }
-        
-        body, html { 
-            margin: 0; padding: 0; 
-            height: 100%; width: 100%; 
-            font-family: 'Playfair Display', serif;
-            overflow: hidden; 
-            transition: background-color 1.5s ease, color 1.5s ease;
-            background-color: #fce4ec;
-            color: #ad1457;
-            user-select: none; 
-            -webkit-user-select: none;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>corazón rotulado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        
+        body, html { 
+            margin: 0; padding: 0; 
+            height: 100%; width: 100%; 
+            font-family: 'Playfair Display', serif;
+            overflow: hidden; 
+            transition: background-color 1.5s ease, color 1.5s ease;
+            background-color: #fce4ec;
+            color: #ad1457;
+            user-select: none; 
+            -webkit-user-select: none;
+        }
 
-        body::after {
-            content: "";
-            position: fixed;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
-            opacity: 0.1;
-            z-index: 999;
-            pointer-events: none;
-            animation: grain-jump 0.6s steps(8) infinite;
-        }
+        /* TEXTURA DE GRANO */
+        body::after {
+            content: "";
+            position: fixed;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
+            opacity: 0.1;
+            z-index: 999;
+            pointer-events: none;
+            animation: grain-jump 0.6s steps(8) infinite;
+        }
 
-        @keyframes grain-jump {
-            0%, 100% { transform: translate(0, 0); }
-            10% { transform: translate(-1%, -2%); }
-            50% { transform: translate(-3%, 1%); }
-        }
+        @keyframes grain-jump {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-1%, -2%); }
+            50% { transform: translate(-3%, 1%); }
+        }
 
-        #contenedor-imagen {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 85%; height: 85%;
-            z-index: 1;
-            opacity: 0;
-            transition: opacity 1.5s ease;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
-            mix-blend-mode: screen; 
-            filter: contrast(1.5) brightness(0.8) sepia(1) saturate(5);
-        }
+        #contenedor-imagen {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%; height: 85%;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            mix-blend-mode: screen; 
+            filter: contrast(1.5) brightness(0.8) sepia(1) saturate(5);
+        }
 
-        #viewport-texto {
-            position: fixed;
-            top: 12vh;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%; 
-            max-width: 500px;
-            height: 70vh; 
-            z-index: 5;
-            overflow-y: auto; 
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
-        }
+        #viewport-texto {
+            position: fixed;
+            top: 12vh;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%; 
+            max-width: 500px;
+            height: 70vh; /* Ajustado para mejor visibilidad */
+            z-index: 5;
+            overflow-y: auto; /* Permite el scroll */
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            /* Máscara suavizada */
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
+            scroll-behavior: smooth;
+        }
 
-        #viewport-texto::-webkit-scrollbar { display: none; }
+        /* Ocultar scrollbar pero mantener funcionalidad */
+        #viewport-texto::-webkit-scrollbar { display: none; }
 
-        #menu-cartas {
-            display: none;
-            flex-direction: column;
-            gap: 4px;
-            padding: 80px 10px;
-            width: 100%;
-            opacity: 0;
-            transition: opacity 1s ease;
-            z-index: 20;
-            flex-shrink: 0;
-        }
+        #menu-cartas {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            padding: 80px 10px; /* Padding extra para que el degradado no tape el texto al inicio/final */
+            width: 100%;
+            opacity: 0;
+            transition: opacity 1s ease;
+            z-index: 20;
+            flex-shrink: 0;
+        }
 
-        .boton-carta {
-            padding: 6px 0;
-            cursor: pointer;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: baseline;
-        }
+        .boton-carta {
+            padding: 12px 0;
+            cursor: pointer;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            text-align: left;
+            display: flex;
+            align-items: baseline;
+            pointer-events: auto;
+        }
 
-        .boton-carta span.numero {
-            font-size: 0.8rem;
-            margin-right: 15px;
-            opacity: 0.5;
-        }
+        .boton-carta span.numero {
+            font-size: 0.8rem;
+            margin-right: 15px;
+            opacity: 0.5;
+        }
 
-        #contenedor-texto { 
-            position: absolute;
-            width: 100%;
-            font-size: 1.4rem; 
-            line-height: 2.3; 
-            opacity: 0;
-            padding: 40px 25px;
-            color: inherit;
-            pointer-events: none; /* Cambia a auto al finalizar animación */
-        }
+        .boton-carta:hover {
+            opacity: 0.6;
+            padding-left: 8px;
+        }
 
-        .bienvenida {
-            position: absolute !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            text-align: center !important;
-            opacity: 1 !important;
-            cursor: pointer;
-            pointer-events: auto !important; 
-        }
+        #contenedor-texto { 
+            position: absolute;
+            width: 100%;
+            text-align: left;
+            font-size: 1.4rem; 
+            line-height: 2.3; 
+            opacity: 0;
+            padding: 20px 25px;
+            color: inherit;
+            pointer-events: none;
+        }
 
-        #footer {
-            position: fixed;
-            bottom: 20px;
-            width: 100%;
-            text-align: center;
-            font-size: 0.65rem;
-            z-index: 100;
-            opacity: 0.7;
-        }
+        .bienvenida {
+            position: absolute !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            text-align: center !important;
+            width: 100% !important;
+            opacity: 1 !important;
+            cursor: pointer;
+            pointer-events: auto !important; 
+        }
 
-        .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
-        .izq { left: 0; } .der { right: 0; }
+        #footer {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 0.65rem;
+            letter-spacing: 0.3px;
+            z-index: 100;
+            opacity: 0.7;
+            line-height: 1.6;
+            transition: color 1.5s ease;
+        }
 
-        #loader-corazones {
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 5rem;
-            opacity: 0;
-            z-index: 1000;
-            transition: opacity 4.5s ease;
-            filter: blur(2px);
-        }
-    </style>
+        #footer a {
+            color: inherit;
+            text-decoration: none;
+            border-bottom: 0.3px solid currentColor;
+            transition: opacity 0.3s ease;
+        }
+
+        #footer a:hover { opacity: 0.5; }
+
+        #loader-corazones {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            opacity: 0;
+            z-index: 1000;
+            transition: opacity 0.4s ease, color 1.5s ease;
+            filter: blur(2px) contrast(180%);
+            letter-spacing: 15px;
+            pointer-events: none;
+        }
+
+        .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
+        .izq { left: 0; } .der { right: 0; }
+    </style>
 </head>
 <body>
 
-    <div id="contenedor-imagen"></div>
+    <div id="contenedor-imagen"></div>
 
-    <div id="controles-navegacion">
-        <div id="zona-regresar" class="zona-click izq" onclick="regresarAlMenu()"></div>
-        <div id="zona-siguiente" class="zona-click der" onmousedown="pausar()" onmouseup="reanudar(1)"></div>
-    </div>
+    <div id="controles-navegacion">
+        <div id="zona-regresar" class="zona-click izq" onclick="regresarAlMenu()"></div>
+        <div id="zona-siguiente" class="zona-click der" onmousedown="pausar()" onmouseup="reanudar(1)"></div>
+    </div>
 
-    <div id="viewport-texto">
-        <div id="loader-corazones">♥♥♥</div>
-        <div id="menu-cartas"></div>
-        <div id="contenedor-texto" class="bienvenida" onclick="iniciarDesdeBienvenida()">todas mis palabras yacen aquí, <br> ¡sé gentil con ellas, por favor!</div>
-    </div>
+    <div id="viewport-texto">
+        <div id="loader-corazones">♥♥♥</div>
+        <div id="menu-cartas"></div>
+        <div id="contenedor-texto" class="bienvenida" onclick="iniciarDesdeBienvenida()">todas mis palabras yacen aquí, <br> ¡sé gentil con ellas, por favor!</div>
+    </div>
 
-    <footer id="footer">
-        this page is the lovechild of <a href="https://thesoundof.love" target="_blank" style="color:inherit">sound of love</a><br>
-        ¿tienes un mensaje? <a href="https://secreto.site/antzz7" target="_blank" style="color:inherit">aquí</a>
-    </footer>
+    <footer id="footer">
+        this page is the lovechild of <a href="https://thesoundof.love" target="_blank">sound of love</a> and son of spergy<br>
+        ¿tienes un mensaje para mí? <a href="https://secreto.site/antzz7" target="_blank">aquí</a>, por favor
+    </footer>
 
-    <script>
-        const S_ID = "1kDWsxPSkUCAYrhr2dUG1gujmiSGo2Crcf36D4TB75js"; 
-        let datosCartas = [];
-        let indiceActual = -1;
-        let animacionActual = null;
-        let msPresionado = 0;
-        let datosListos = false;
+    <script>
+        const S_ID = "1kDWsxPSkUCAYrhr2dUG1gujmiSGo2Crcf36D4TB75js"; 
+        let datosCartas = [];
+        let indiceActual = -1;
+        let interactuado = false;
+        let animacionActual = null;
+        let msPresionado = 0;
+        let estaPausado = false;
+        let datosListos = false;
 
-        const combinaciones = [
-            { bg: "#fce4ec", txt: "#ad1457" }, { bg: "#e8eaf6", txt: "#283593" }, 
-            { bg: "#e0f2f1", txt: "#00695c" }, { bg: "#f1f8e9", txt: "#33691e" }, 
-            { bg: "#fff3e0", txt: "#e65100" }
-        ];
+        const combinaciones = [
+            { bg: "#fce4ec", txt: "#ad1457" }, 
+            { bg: "#e8eaf6", txt: "#283593" }, 
+            { bg: "#e0f2f1", txt: "#00695c" }, 
+            { bg: "#f1f8e9", txt: "#33691e" }, 
+            { bg: "#fff3e0", txt: "#e65100" }
+        ];
 
-        async function cargarCartas() {
-            const url = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:json`;
-            try {
-                const res = await fetch(url);
-                const t = await res.text();
-                const json = JSON.parse(t.substr(47).slice(0, -2));
-                datosCartas = json.table.rows.map(row => ({
-                    texto: row.c[0] ? row.c[0].v : "",
-                    img: (row.c[1] && row.c[1].v) ? row.c[1].v : null,
-                    titulo: (row.c[2] && row.c[2].v) ? row.c[2].v : "Sin título"
-                }));
-                datosListos = true;
-            } catch (e) { console.error("Error Sheets"); }
-        }
+        async function cargarCartas() {
+            const url = `https://docs.google.com/spreadsheets/d/${S_ID}/gviz/tq?tqx=out:json`;
+            try {
+                const res = await fetch(url);
+                const t = await res.text();
+                const json = JSON.parse(t.substr(47).slice(0, -2));
+                datosCartas = json.table.rows.map(row => ({
+                    texto: row.c[0] ? row.c[0].v : "",
+                    img: (row.c[1] && row.c[1].v) ? row.c[1].v : null,
+                    titulo: (row.c[2] && row.c[2].v) ? row.c[2].v : "Sin título"
+                }));
+                datosListos = true;
+            } catch (e) { console.error("Error Sheets"); }
+        }
 
-        function iniciarDesdeBienvenida() { if (datosListos) secuenciaEntrada(); }
+        function iniciarDesdeBienvenida() {
+            if (!datosListos) return;
+            secuenciaEntrada();
+        }
 
-        function secuenciaEntrada() {
-            const bienvenidaEl = document.getElementById('contenedor-texto');
-            const loader = document.getElementById('loader-corazones');
-            bienvenidaEl.style.opacity = 0;
-            setTimeout(() => {
-                bienvenidaEl.style.display = 'none';
-                loader.style.opacity = 0.6;
-                setTimeout(() => { loader.style.opacity = 0; generarMenu(); }, 1500);
-            }, 800);
-        }
+        function secuenciaEntrada() {
+            const bienvenidaEl = document.getElementById('contenedor-texto');
+            const loader = document.getElementById('loader-corazones');
+            
+            bienvenidaEl.style.opacity = 0;
+            bienvenidaEl.style.pointerEvents = 'none';
 
-        function generarMenu() {
-            const menuEl = document.getElementById('menu-cartas');
-            const viewport = document.getElementById('viewport-texto');
-            document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
-            
-            // Reset visual
-            viewport.style.webkitMaskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
-            viewport.style.maskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
-            viewport.scrollTop = 0;
+            setTimeout(() => {
+                bienvenidaEl.style.display = 'none';
+                loader.style.opacity = 0.6;
+                setTimeout(() => {
+                    loader.style.opacity = 0;
+                    generarMenu();
+                }, 1500);
+            }, 800);
+        }
 
-            menuEl.innerHTML = ""; 
-            menuEl.style.display = 'flex';
-            datosCartas.forEach((carta, i) => {
-                const btn = document.createElement('div');
-                btn.className = 'boton-carta';
-                btn.innerHTML = `<span class="numero">${(i + 1).toString().padStart(2, '0')}</span> ${carta.titulo}`;
-                btn.onclick = (e) => { e.stopPropagation(); seleccionarCarta(i); };
-                menuEl.appendChild(btn);
-            });
-            setTimeout(() => menuEl.style.opacity = 1, 50);
-        }
+        function generarMenu() {
+            const menuEl = document.getElementById('menu-cartas');
+            const contImg = document.getElementById('contenedor-imagen');
+            const textoEl = document.getElementById('contenedor-texto');
+            const viewport = document.getElementById('viewport-texto');
+            
+            document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
+            if (animacionActual) animacionActual.cancel();
+            
+            // Reset de estados
+            interactuado = false;
+            textoEl.style.opacity = 0;
+            textoEl.style.display = 'none';
+            contImg.style.opacity = 0;
+            
+            // Limpiar y resetear scroll
+            viewport.scrollTop = 0;
+            menuEl.innerHTML = ""; 
+            menuEl.style.display = 'flex';
+            
+            datosCartas.forEach((carta, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'boton-carta';
+                btn.innerHTML = `<span class="numero">${(i + 1).toString().padStart(2, '0')}</span> ${carta.titulo}`;
+                btn.onclick = (e) => { e.stopPropagation(); seleccionarCarta(i); };
+                menuEl.appendChild(btn);
+            });
+            
+            setTimeout(() => menuEl.style.opacity = 1, 50);
+        }
 
-        function seleccionarCarta(index) {
-            indiceActual = index;
-            document.getElementById('menu-cartas').style.opacity = 0;
-            setTimeout(() => {
-                document.getElementById('menu-cartas').style.display = 'none';
-                document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'block');
-                cambiarCarta(0); 
-            }, 500);
-        }
+        function regresarAlMenu() {
+            const loader = document.getElementById('loader-corazones');
+            const textoEl = document.getElementById('contenedor-texto');
+            const contImg = document.getElementById('contenedor-imagen');
+            
+            if (animacionActual) animacionActual.cancel();
+            textoEl.style.opacity = 0;
+            contImg.style.opacity = 0;
 
-        function regresarAlMenu() {
-            if (animacionActual) animacionActual.cancel();
-            document.getElementById('contenedor-texto').style.opacity = 0;
-            document.getElementById('contenedor-imagen').style.opacity = 0;
-            document.getElementById('loader-corazones').style.opacity = 0.6;
-            setTimeout(() => {
-                document.getElementById('loader-corazones').style.opacity = 0;
-                generarMenu();
-            }, 800);
-        }
+            loader.style.opacity = 0.6;
+            setTimeout(() => {
+                loader.style.opacity = 0;
+                generarMenu();
+            }, 1000);
+        }
 
-        function pausar() { if (animacionActual) animacionActual.pause(); msPresionado = Date.now(); }
-        function reanudar(dir) {
-            if ((Date.now() - msPresionado) < 250) cambiarCarta(dir);
-            else if (animacionActual) animacionActual.play();
-        }
+        function seleccionarCarta(index) {
+            indiceActual = index;
+            document.getElementById('menu-cartas').style.opacity = 0;
+            setTimeout(() => {
+                document.getElementById('menu-cartas').style.display = 'none';
+                document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'block');
+                cambiarCarta(0); 
+            }, 500);
+        }
 
-        function cambiarCarta(dir) {
-            const textoEl = document.getElementById('contenedor-texto');
-            const viewport = document.getElementById('viewport-texto');
-            const contImg = document.getElementById('contenedor-imagen');
+        function pausar() {
+            if (animacionActual) { animacionActual.pause(); estaPausado = true; msPresionado = Date.now(); }
+        }
 
-            if (animacionActual) animacionActual.cancel();
-            
-            // Reset para nueva carta
-            textoEl.style.opacity = 0;
-            textoEl.style.position = "absolute";
-            textoEl.style.pointerEvents = "none";
-            viewport.style.webkitMaskImage = "linear-gradient(to bottom, transparent, black 15%, black 85%, transparent)";
-            viewport.scrollTop = 0;
-            contImg.style.opacity = 0;
+        function reanudar(dir) {
+            if ((Date.now() - msPresionado) < 250) { cambiarCarta(dir); } 
+            else if (animacionActual) { animacionActual.play(); }
+            estaPausado = false;
+        }
 
-            setTimeout(() => {
-                const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
-                document.body.style.backgroundColor = combo.bg;
-                document.body.style.color = combo.txt;
+        function cambiarCarta(dir) {
+            const textoEl = document.getElementById('contenedor-texto');
+            const contImg = document.getElementById('contenedor-imagen');
+            const loader = document.getElementById('loader-corazones');
+            const viewport = document.getElementById('viewport-texto');
 
-                if (dir !== 0) indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length;
-                const carta = datosCartas[indiceActual];
-                
-                textoEl.innerText = carta.texto;
-                textoEl.style.display = 'block';
-                if (carta.img) {
-                    contImg.style.backgroundImage = `url('${carta.img}')`;
-                    contImg.style.opacity = 0.4;
-                }
+            if (animacionActual) animacionActual.cancel();
+            
+            textoEl.style.opacity = 0;
+            contImg.style.opacity = 0;
+            viewport.scrollTop = 0;
 
-                document.getElementById('loader-corazones').style.opacity = 0.6;
+            setTimeout(() => {
+                const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
+                document.body.style.backgroundColor = combo.bg;
+                document.body.style.color = combo.txt;
 
-                setTimeout(() => {
-                    document.getElementById('loader-corazones').style.opacity = 0;
-                    textoEl.style.opacity = 1;
-                    
-                    const duracion = ((textoEl.offsetHeight + viewport.offsetHeight) / 50) * 1000;
+                textoEl.innerText = "";
+                textoEl.classList.remove('bienvenida');
+                textoEl.style.display = 'block';
+                textoEl.style.position = "absolute";
 
-                    animacionActual = textoEl.animate([
-                        { transform: `translateY(${viewport.offsetHeight}px)` }, 
-                        { transform: `translateY(-${textoEl.offsetHeight}px)` }
-                    ], { duration: duracion, easing: 'linear' });
+                loader.style.opacity = 0.6;
 
-                    animacionActual.onfinish = () => {
-                        textoEl.style.position = "relative";
-                        textoEl.style.transform = "none";
-                        textoEl.style.pointerEvents = "auto";
-                        // Quitamos el degradado para que el usuario lea libremente
-                        viewport.style.webkitMaskImage = "none";
-                    };
-                }, 1200);
-            }, 500);
-        }
+                setTimeout(() => {
+                    loader.style.opacity = 0;
+                    if (dir !== 0) { 
+                        indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length; 
+                    }
 
-        cargarCartas();
-    </script>
+                    const carta = datosCartas[indiceActual];
+                    textoEl.innerText = carta.texto;
+
+                    const alturaTexto = textoEl.offsetHeight || 500; 
+                    const pixelesPorSegundo = 50; 
+                    const duracionDinamica = ((alturaTexto + window.innerHeight) / pixelesPorSegundo) * 1200;
+
+                    if (carta.img) {
+                        contImg.style.backgroundImage = `url('${carta.img}')`;
+                        contImg.style.opacity = 0.5; 
+                    }
+
+                    textoEl.style.opacity = 1;
+                    interactuado = true;
+
+                    animacionActual = textoEl.animate([
+                        { transform: 'translateY(60vh)' }, 
+                        { transform: 'translateY(-120%)' }
+                    ], { 
+                        duration: duracionDinamica, 
+                        iterations: 1, 
+                        easing: 'linear' 
+                    });
+
+                    animacionActual.onfinish = () => {
+                        textoEl.style.position = "relative";
+                        textoEl.style.transform = "none";
+                    };
+                }, 1500);
+            }, 600);
+        }
+
+        cargarCartas();
+    </script>
 </body>
 </html>
-
-puedes hacer que los corazones se ven más blurry?
