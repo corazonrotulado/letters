@@ -47,7 +47,6 @@
             letter-spacing: 15px; pointer-events: none;
         }
 
-        /* EFECTO VUELO */
         #contenedor-vuelo {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 1000; overflow: hidden; display: none;
@@ -64,7 +63,16 @@
 
         #menu-cartas { display: none; flex-direction: column; gap: 5px; padding: 80px 15px; width: 100%; z-index: 20; overflow-y: auto; opacity: 0; transition: opacity 1s ease; }
         #menu-cartas::-webkit-scrollbar { display: none; }
-        .boton-carta { padding: 15px 0; cursor: pointer; font-size: 1.1rem; text-align: left; opacity: 0.7; transition: 0.3s; }
+        
+        .boton-carta { 
+            padding: 12px 0; 
+            cursor: pointer; 
+            font-size: 1.1rem; 
+            text-align: left; 
+            opacity: 0.7; 
+            transition: 0.3s ease;
+            /* Se eliminó el border-bottom aquí */
+        }
         .boton-carta:hover { opacity: 1; padding-left: 10px; }
 
         .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
