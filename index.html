@@ -11,7 +11,7 @@
             margin: 0; padding: 0; height: 100%; width: 100%; 
             font-family: 'Playfair Display', serif; overflow: hidden; 
             background-color: #fce4ec; color: #ad1457;
-            transition: background-color 1.5s ease, color 1.5s ease;
+            transition: background-color 1.2s ease, color 1.2s ease;
             user-select: none; -webkit-user-select: none;
         }
 
@@ -33,6 +33,7 @@
             position: absolute; width: 100%; text-align: left; font-size: 1.4rem; 
             line-height: 2.3; opacity: 0; padding: 20px 25px; pointer-events: none;
             white-space: pre-wrap;
+            transform: translateY(70vh);
         }
 
         .bienvenida {
@@ -54,7 +55,7 @@
         .palabra-voladora {
             position: absolute; white-space: nowrap; font-size: 1.8rem; font-style: italic;
             opacity: 0.9; color: inherit; animation: volar-izq linear forwards;
-            text-shadow: 0 0 10px rgba(255,255,255,0.3);
+            text-shadow: 0 0 15px rgba(255,255,255,0.4);
         }
         @keyframes volar-izq {
             from { transform: translateX(115vw); }
@@ -64,15 +65,7 @@
         #menu-cartas { display: none; flex-direction: column; gap: 5px; padding: 80px 15px; width: 100%; z-index: 20; overflow-y: auto; opacity: 0; transition: opacity 1s ease; }
         #menu-cartas::-webkit-scrollbar { display: none; }
         
-        .boton-carta { 
-            padding: 12px 0; 
-            cursor: pointer; 
-            font-size: 1.1rem; 
-            text-align: left; 
-            opacity: 0.7; 
-            transition: 0.3s ease;
-            /* Se eliminó el border-bottom aquí */
-        }
+        .boton-carta { padding: 15px 0; cursor: pointer; font-size: 1.1rem; text-align: left; opacity: 0.6; transition: 0.3s ease; }
         .boton-carta:hover { opacity: 1; padding-left: 10px; }
 
         .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
@@ -99,9 +92,17 @@
         let datosCartas = [];
         let indiceActual = -1;
         let animacionActual = null;
+
+        // Paleta de colores más variada
         const combinaciones = [
-            { bg: "#fce4ec", txt: "#ad1457" }, { bg: "#e8eaf6", txt: "#283593" }, 
-            { bg: "#e0f2f1", txt: "#00695c" }, { bg: "#fff3e0", txt: "#e65100" }
+            { bg: "#fce4ec", txt: "#ad1457" }, // Rosa
+            { bg: "#e8eaf6", txt: "#1a237e" }, // Azul noche
+            { bg: "#e0f2f1", txt: "#004d40" }, // Verde agua
+            { bg: "#fff3e0", txt: "#e65100" }, // Naranja
+            { bg: "#f3e5f5", txt: "#4a148c" }, // Violeta
+            { bg: "#efebe9", txt: "#3e2723" }, // Café arena
+            { bg: "#e1f5fe", txt: "#01579b" }, // Celeste
+            { bg: "#f9fbe7", txt: "#33691e" }  // Lima suave
         ];
 
         async function cargar() {
@@ -127,8 +128,8 @@
                 setTimeout(() => {
                     loader.style.opacity = 0;
                     mostrarMenu();
-                }, 1200);
-            }, 500);
+                }, 1000);
+            }, 400);
         }
 
         function mostrarMenu() {
@@ -140,7 +141,7 @@
             datosCartas.forEach((c, i) => {
                 const btn = document.createElement('div');
                 btn.className = 'boton-carta';
-                btn.innerHTML = `<span style="opacity:0.4; font-size:0.8rem; margin-right:10px">${(i+1).toString().padStart(2,'0')}</span> ${c.titulo}`;
+                btn.innerHTML = `<span style="opacity:0.3; font-size:0.8rem; margin-right:12px">${(i+1).toString().padStart(2,'0')}</span> ${c.titulo}`;
                 btn.onclick = () => {
                     indiceActual = i;
                     menu.style.opacity = 0;
@@ -148,7 +149,7 @@
                         menu.style.display = 'none';
                         document.querySelectorAll('.zona-click').forEach(z => z.style.display = 'block');
                         cambiarCarta(0);
-                    }, 500);
+                    }, 400);
                 };
                 menu.appendChild(btn);
             });
@@ -165,12 +166,12 @@
                     const span = document.createElement('span');
                     span.className = 'palabra-voladora';
                     span.innerText = p;
-                    span.style.top = (Math.random() * 60 + 15) + "vh";
-                    const d = Math.random() * 2 + 6;
+                    span.style.top = (Math.random() * 65 + 10) + "vh";
+                    const d = Math.random() * 3 + 6;
                     span.style.animationDuration = d + "s";
                     cont.appendChild(span);
                     setTimeout(() => span.remove(), d * 1000);
-                }, i * 900);
+                }, i * 850);
             });
         }
 
@@ -181,11 +182,14 @@
             const contVuelo = document.getElementById('contenedor-vuelo');
             
             txtEl.style.opacity = 0;
+            txtEl.style.transform = "translateY(70vh)"; // Reset posición
             contVuelo.style.display = 'none';
             loader.style.opacity = 0.6;
 
             setTimeout(() => {
                 loader.style.opacity = 0;
+                
+                // Cambio de color más notable
                 const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
                 document.body.style.backgroundColor = combo.bg;
                 document.body.style.color = combo.txt;
@@ -200,12 +204,19 @@
                 } else {
                     txtEl.innerText = carta.texto;
                     txtEl.style.opacity = 1;
-                    const dur = ((txtEl.offsetHeight + window.innerHeight) / 50) * 1100;
+                    
+                    // Cálculo de duración
+                    const dur = ((txtEl.offsetHeight + window.innerHeight) / 45) * 1000;
                     animacionActual = txtEl.animate([
-                        { transform: 'translateY(65vh)' }, { transform: 'translateY(-130%)' }
-                    ], { duration: Math.max(dur, 8000), iterations: 1, easing: 'linear' });
+                        { transform: 'translateY(70vh)' }, 
+                        { transform: 'translateY(-130%)' }
+                    ], { 
+                        duration: Math.max(dur, 9000), 
+                        iterations: 1, 
+                        easing: 'linear' 
+                    });
                 }
-            }, 1000);
+            }, 800);
         }
 
         function regresarAlMenu() {
@@ -218,7 +229,7 @@
             setTimeout(() => {
                 loader.style.opacity = 0;
                 mostrarMenu();
-            }, 1000);
+            }, 800);
         }
 
         cargar();
