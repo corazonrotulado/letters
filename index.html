@@ -20,7 +20,6 @@
             -webkit-user-select: none;
         }
 
-        /* TEXTURA DE GRANO */
         body::after {
             content: "";
             position: fixed;
@@ -176,7 +175,7 @@
             top: 0; left: 0;
             width: 100%; height: 100%;
             pointer-events: none;
-            z-index: 15;
+            z-index: 9999; /* Muy alto para que se vea siempre */
             overflow: hidden;
             display: none;
         }
@@ -184,15 +183,16 @@
         .palabra-voladora {
             position: absolute;
             white-space: nowrap;
-            font-size: 1.4rem;
+            font-size: 1.8rem; /* Un poco más grande para que se note */
             font-style: italic;
-            opacity: 0.7;
+            opacity: 0.9;
+            color: inherit;
             animation: volar-izquierda linear forwards;
         }
 
         @keyframes volar-izquierda {
             from { transform: translateX(110vw); }
-            to { transform: translateX(-110%); }
+            to { transform: translateX(-150%); }
         }
     </style>
 </head>
@@ -241,12 +241,15 @@
                 const res = await fetch(url);
                 const t = await res.text();
                 const json = JSON.parse(t.substr(47).slice(0, -2));
-                datosCartas = json.table.rows.map(row => ({
-                    texto: row.c[0] ? row.c[0].v : "",
-                    img: (row.c[1] && row.c[1].v) ? row.c[1].v : null,
-                    titulo: (row.c[2] && row.c[2].v) ? row.c[2].v : "Sin título",
-                    vuelo: (row.c[4] && row.c[4].v) ? row.c[4].v : null
-                }));
+                datosCartas = json.table.rows.map(row => {
+                    // Mapeo manual para asegurar que lea la columna E (índice 4)
+                    return {
+                        texto: row.c[0] ? row.c[0].v : "",
+                        img: (row.c[1] && row.c[1].v) ? row.c[1].v : null,
+                        titulo: (row.c[2] && row.c[2].v) ? row.c[2].v : "Sin título",
+                        vuelo: (row.c[4] && row.c[4].v) ? String(row.c[4].v) : null // Forzamos Columna E
+                    };
+                });
                 datosListos = true;
             } catch (e) { console.error("Error Sheets"); }
         }
@@ -304,7 +307,11 @@
             const loader = document.getElementById('loader-corazones');
             const textoEl = document.getElementById('contenedor-texto');
             const contImg = document.getElementById('contenedor-imagen');
+            const contVuelo = document.getElementById('contenedor-vuelo');
+            
             if (animacionActual) animacionActual.cancel();
+            if (contVuelo) { contVuelo.style.display = 'none'; contVuelo.innerHTML = ''; }
+            
             textoEl.style.opacity = 0;
             contImg.style.opacity = 0;
             loader.style.opacity = 0.6;
@@ -338,18 +345,23 @@
             const contVuelo = document.getElementById('contenedor-vuelo');
             contVuelo.style.display = 'block';
             contVuelo.innerHTML = '';
-            const frases = frasesString.split(',').map(f => f.trim());
+            
+            // Dividimos por comas
+            const frases = frasesString.split(',').map(f => f.trim()).filter(f => f !== "");
+            
             frases.forEach((frase, i) => {
                 setTimeout(() => {
                     const span = document.createElement('span');
                     span.className = 'palabra-voladora';
                     span.innerText = frase;
-                    span.style.top = (Math.random() * 70 + 15) + "vh";
-                    const duracion = Math.random() * 4 + 6;
+                    // Distribución en pantalla
+                    span.style.top = (Math.random() * 75 + 10) + "vh";
+                    const duracion = Math.random() * 3 + 5; // 5 a 8 segundos
                     span.style.animationDuration = duracion + "s";
                     contVuelo.appendChild(span);
+                    
                     setTimeout(() => span.remove(), duracion * 1000);
-                }, i * 700);
+                }, i * 600); // Salen con delay
             });
         }
 
@@ -386,10 +398,14 @@
 
                     const carta = datosCartas[indiceActual];
                     
-                    // LÓGICA ESPECIAL CORAZÓN ROTULADO
-                    if (carta.titulo.toLowerCase().trim() === "corazón rotulado") {
-                        textoEl.innerText = ""; // No mostramos texto central
-                        if (carta.vuelo) lanzarVuelo(carta.vuelo);
+                    // Verificación de título (Ignora mayúsculas/minúsculas)
+                    const esCorazonRotulado = carta.titulo.toLowerCase().trim() === "corazón rotulado";
+
+                    if (esCorazonRotulado) {
+                        textoEl.innerText = ""; 
+                        if (carta.vuelo) {
+                            lanzarVuelo(carta.vuelo);
+                        }
                     } else {
                         textoEl.innerText = carta.texto;
                     }
