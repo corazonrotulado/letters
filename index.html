@@ -11,9 +11,10 @@
             margin: 0; padding: 0; height: 100%; width: 100%; 
             font-family: 'Playfair Display', serif; overflow: hidden; 
             background-color: #fce4ec; color: #ad1457;
-            transition: background-color 1.5s ease, color 1.5s ease;
+            transition: background-color 1.2s ease;
         }
 
+        /* TEXTURA POLVO DE ESTRELLAS */
         body::after {
             content: ""; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
             background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
@@ -21,8 +22,8 @@
         }
 
         #viewport-texto {
-            position: fixed; top: 12vh; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 500px; height: 70vh; z-index: 5;
+            position: fixed; top: 10vh; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 500px; height: 75vh; z-index: 5;
             display: flex; flex-direction: column; overflow: hidden;
         }
 
@@ -45,16 +46,18 @@
         .palabra-voladora {
             position: absolute; white-space: nowrap; font-size: 1.8rem; font-style: italic;
             opacity: 0.9; color: inherit; animation: volar-izq linear forwards;
+            text-shadow: 0 0 10px rgba(255,255,255,0.4);
         }
 
         @keyframes volar-izq {
-            from { transform: translateX(110vw); }
-            to { transform: translateX(-150%); }
+            from { transform: translateX(115vw); }
+            to { transform: translateX(-160%); }
         }
 
-        #menu-cartas { display: none; flex-direction: column; gap: 5px; padding: 80px 10px; width: 100%; z-index: 20; overflow-y: auto; height: 100%; }
+        #menu-cartas { display: none; flex-direction: column; gap: 5px; padding: 60px 15px; width: 100%; z-index: 20; overflow-y: auto; height: 100%; }
         #menu-cartas::-webkit-scrollbar { display: none; }
-        .boton-carta { padding: 12px 0; cursor: pointer; font-size: 1.1rem; text-align: left; border-bottom: 0.5px solid rgba(0,0,0,0.05); }
+        .boton-carta { padding: 18px 0; cursor: pointer; font-size: 1.1rem; text-align: left; border-bottom: 0.5px solid rgba(173, 20, 87, 0.15); opacity: 0.8; }
+        
         .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
         .izq { left: 0; } .der { right: 0; }
     </style>
@@ -89,27 +92,35 @@
                     texto: row.c[0] ? String(row.c[0].v) : "",
                     titulo: row.c[2] ? String(row.c[2].v) : "Sin título"
                 }));
-            } catch (e) { console.error("Error cargando datos"); }
+            } catch (e) { console.error("Error de conexión"); }
         }
 
-        function lanzarVuelo(texto) {
+        function lanzarVuelo(fraseCompleta) {
             const cont = document.getElementById('contenedor-vuelo');
             cont.style.display = 'block';
             cont.innerHTML = '';
-            // Separamos por guiones
-            const palabras = texto.split('-').map(p => p.trim()).filter(p => p !== "");
             
-            palabras.forEach((p, i) => {
+            // Divide las palabras por el guion
+            const trozos = fraseCompleta.split('-').map(p => p.trim()).filter(p => p !== "");
+            
+            if (trozos.length === 0) {
+                console.log("No hay palabras para volar");
+                return;
+            }
+
+            trozos.forEach((palabra, i) => {
                 setTimeout(() => {
                     const span = document.createElement('span');
                     span.className = 'palabra-voladora';
-                    span.innerText = p;
-                    span.style.top = (Math.random() * 60 + 20) + "vh";
-                    const dur = Math.random() * 3 + 5;
-                    span.style.animationDuration = dur + "s";
+                    span.innerText = palabra;
+                    span.style.top = (Math.random() * 65 + 15) + "vh"; // Altura aleatoria
+                    const duracion = Math.random() * 3 + 6; // Entre 6 y 9 segundos
+                    span.style.animationDuration = duracion + "s";
                     cont.appendChild(span);
-                    setTimeout(() => span.remove(), dur * 1000);
-                }, i * 800);
+                    
+                    // Limpieza
+                    setTimeout(() => span.remove(), duracion * 1000);
+                }, i * 950); // Sale una palabra cada segundo aprox
             });
         }
 
@@ -126,45 +137,43 @@
                 indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length;
                 const carta = datosCartas[indiceActual];
                 
-                // Normalizamos el título para que no falle por tildes o espacios
-                const tituloLimpio = carta.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                // LIMPIEZA TOTAL: Pasa a minúsculas y quita cualquier tilde o espacio raro
+                const tituloID = String(carta.titulo).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-                // LA CONDICIÓN: Si el título es "corazon rotulado"
-                if (tituloLimpio === "corazon rotulado") {
-                    txtEl.innerText = ""; // Limpiamos el centro
+                if (tituloID === "corazon rotulado") {
+                    txtEl.innerText = ""; 
                     lanzarVuelo(carta.texto);
                 } else {
                     txtEl.innerText = carta.texto;
                     txtEl.style.opacity = 1;
                     const dur = ((txtEl.offsetHeight + window.innerHeight) / 50) * 1200;
                     animacionActual = txtEl.animate([{ transform: 'translateY(65vh)' }, { transform: 'translateY(-130%)' }], 
-                        { duration: dur, iterations: 1, easing: 'linear' });
+                        { duration: Math.max(dur, 7000), iterations: 1, easing: 'linear' });
                 }
-            }, 500);
+            }, 300);
         }
 
         function iniciar() {
-            document.getElementById('contenedor-texto').style.display = 'none';
             const m = document.getElementById('menu-cartas');
+            const b = document.getElementById('contenedor-texto');
+            b.style.display = 'none';
             m.style.display = 'flex';
             m.innerHTML = "";
             datosCartas.forEach((c, i) => {
-                const b = document.createElement('div');
-                b.className = 'boton-carta';
-                b.innerText = c.titulo;
-                b.onclick = () => {
+                const btn = document.createElement('div');
+                btn.className = 'boton-carta';
+                btn.innerText = c.titulo;
+                btn.onclick = () => {
                     indiceActual = i;
                     m.style.display = 'none';
                     document.querySelectorAll('.zona-click').forEach(z => z.style.display = 'block');
                     cambiarCarta(0);
                 };
-                m.appendChild(b);
+                m.appendChild(btn);
             });
         }
 
-        function regresarAlMenu() {
-            location.reload();
-        }
+        function regresarAlMenu() { location.reload(); }
 
         cargar();
     </script>
