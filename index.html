@@ -14,7 +14,7 @@
             transition: background-color 1.2s ease;
         }
 
-        /* TEXTURA POLVO DE ESTRELLAS */
+        /* TEXTURA */
         body::after {
             content: ""; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
             background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
@@ -38,6 +38,7 @@
             text-align: center !important; opacity: 1 !important; cursor: pointer; pointer-events: auto !important; 
         }
 
+        /* PALABRAS VOLADORAS */
         #contenedor-vuelo {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             pointer-events: none; z-index: 1000; overflow: hidden; display: none;
@@ -46,12 +47,11 @@
         .palabra-voladora {
             position: absolute; white-space: nowrap; font-size: 1.8rem; font-style: italic;
             opacity: 0.9; color: inherit; animation: volar-izq linear forwards;
-            text-shadow: 0 0 10px rgba(255,255,255,0.4);
         }
 
         @keyframes volar-izq {
-            from { transform: translateX(115vw); }
-            to { transform: translateX(-160%); }
+            from { transform: translateX(110vw); }
+            to { transform: translateX(-150%); }
         }
 
         #menu-cartas { display: none; flex-direction: column; gap: 5px; padding: 60px 15px; width: 100%; z-index: 20; overflow-y: auto; height: 100%; }
@@ -99,28 +99,19 @@
             const cont = document.getElementById('contenedor-vuelo');
             cont.style.display = 'block';
             cont.innerHTML = '';
-            
-            // Divide las palabras por el guion
             const trozos = fraseCompleta.split('-').map(p => p.trim()).filter(p => p !== "");
-            
-            if (trozos.length === 0) {
-                console.log("No hay palabras para volar");
-                return;
-            }
 
             trozos.forEach((palabra, i) => {
                 setTimeout(() => {
                     const span = document.createElement('span');
                     span.className = 'palabra-voladora';
                     span.innerText = palabra;
-                    span.style.top = (Math.random() * 65 + 15) + "vh"; // Altura aleatoria
-                    const duracion = Math.random() * 3 + 6; // Entre 6 y 9 segundos
+                    span.style.top = (Math.random() * 70 + 10) + "vh";
+                    const duracion = Math.random() * 3 + 7;
                     span.style.animationDuration = duracion + "s";
                     cont.appendChild(span);
-                    
-                    // Limpieza
                     setTimeout(() => span.remove(), duracion * 1000);
-                }, i * 950); // Sale una palabra cada segundo aprox
+                }, i * 1000);
             });
         }
 
@@ -137,18 +128,21 @@
                 indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length;
                 const carta = datosCartas[indiceActual];
                 
-                // LIMPIEZA TOTAL: Pasa a minúsculas y quita cualquier tilde o espacio raro
-                const tituloID = String(carta.titulo).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+                // Normalización de título para detectar "corazón rotulado"
+                const tituloLimpio = carta.titulo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
-                if (tituloID === "corazon rotulado") {
+                if (tituloLimpio === "corazon rotulado") {
                     txtEl.innerText = ""; 
                     lanzarVuelo(carta.texto);
                 } else {
                     txtEl.innerText = carta.texto;
                     txtEl.style.opacity = 1;
-                    const dur = ((txtEl.offsetHeight + window.innerHeight) / 50) * 1200;
-                    animacionActual = txtEl.animate([{ transform: 'translateY(65vh)' }, { transform: 'translateY(-130%)' }], 
-                        { duration: Math.max(dur, 7000), iterations: 1, easing: 'linear' });
+                    // Cálculo de duración basado en longitud de texto
+                    const dur = ((txtEl.offsetHeight + window.innerHeight) / 50) * 1100;
+                    animacionActual = txtEl.animate([
+                        { transform: 'translateY(70vh)' }, 
+                        { transform: 'translateY(-130%)' }
+                    ], { duration: Math.max(dur, 8000), iterations: 1, easing: 'linear' });
                 }
             }, 300);
         }
