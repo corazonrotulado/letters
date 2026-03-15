@@ -32,8 +32,7 @@
         #contenedor-texto { 
             position: absolute; width: 100%; text-align: left; font-size: 1.4rem; 
             line-height: 2.3; opacity: 0; padding: 20px 25px; pointer-events: none;
-            white-space: pre-wrap;
-            transform: translateY(70vh);
+            white-space: pre-wrap; display: block;
         }
 
         .bienvenida {
@@ -93,16 +92,10 @@
         let indiceActual = -1;
         let animacionActual = null;
 
-        // Paleta de colores más variada
         const combinaciones = [
-            { bg: "#fce4ec", txt: "#ad1457" }, // Rosa
-            { bg: "#e8eaf6", txt: "#1a237e" }, // Azul noche
-            { bg: "#e0f2f1", txt: "#004d40" }, // Verde agua
-            { bg: "#fff3e0", txt: "#e65100" }, // Naranja
-            { bg: "#f3e5f5", txt: "#4a148c" }, // Violeta
-            { bg: "#efebe9", txt: "#3e2723" }, // Café arena
-            { bg: "#e1f5fe", txt: "#01579b" }, // Celeste
-            { bg: "#f9fbe7", txt: "#33691e" }  // Lima suave
+            { bg: "#fce4ec", txt: "#ad1457" }, { bg: "#e8eaf6", txt: "#1a237e" }, 
+            { bg: "#e0f2f1", txt: "#004d40" }, { bg: "#fff3e0", txt: "#e65100" }, 
+            { bg: "#f3e5f5", txt: "#4a148c" }, { bg: "#efebe9", txt: "#3e2723" }
         ];
 
         async function cargar() {
@@ -176,20 +169,18 @@
         }
 
         function cambiarCarta(dir) {
-            if (animacionActual) animacionActual.cancel();
+            if (animacionActual) { animacionActual.cancel(); animacionActual = null; }
             const txtEl = document.getElementById('contenedor-texto');
             const loader = document.getElementById('loader-corazones');
             const contVuelo = document.getElementById('contenedor-vuelo');
             
             txtEl.style.opacity = 0;
-            txtEl.style.transform = "translateY(70vh)"; // Reset posición
             contVuelo.style.display = 'none';
             loader.style.opacity = 0.6;
 
             setTimeout(() => {
                 loader.style.opacity = 0;
                 
-                // Cambio de color más notable
                 const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
                 document.body.style.backgroundColor = combo.bg;
                 document.body.style.color = combo.txt;
@@ -203,24 +194,27 @@
                     lanzarVuelo(carta.texto);
                 } else {
                     txtEl.innerText = carta.texto;
-                    txtEl.style.opacity = 1;
-                    
-                    // Cálculo de duración
-                    const dur = ((txtEl.offsetHeight + window.innerHeight) / 45) * 1000;
-                    animacionActual = txtEl.animate([
-                        { transform: 'translateY(70vh)' }, 
-                        { transform: 'translateY(-130%)' }
-                    ], { 
-                        duration: Math.max(dur, 9000), 
-                        iterations: 1, 
-                        easing: 'linear' 
-                    });
+                    // Forzar un pequeño delay para que el navegador mida el texto correctamente
+                    setTimeout(() => {
+                        txtEl.style.opacity = 1;
+                        const alturaTotal = txtEl.offsetHeight;
+                        const dur = ((alturaTotal + window.innerHeight) / 45) * 1000;
+                        
+                        animacionActual = txtEl.animate([
+                            { transform: 'translateY(75vh)' }, 
+                            { transform: `translateY(-${alturaTotal + 100}px)` }
+                        ], { 
+                            duration: Math.max(dur, 8000), 
+                            iterations: 1, 
+                            easing: 'linear' 
+                        });
+                    }, 50);
                 }
             }, 800);
         }
 
         function regresarAlMenu() {
-            if (animacionActual) animacionActual.cancel();
+            if (animacionActual) { animacionActual.cancel(); animacionActual = null; }
             const loader = document.getElementById('loader-corazones');
             const txtEl = document.getElementById('contenedor-texto');
             txtEl.style.opacity = 0;
