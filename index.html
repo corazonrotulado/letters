@@ -315,7 +315,7 @@
             estaPausado = false;
         }
 
-        function cambiarCarta(dir) {
+function cambiarCarta(dir) {
             const textoEl = document.getElementById('contenedor-texto');
             const contImg = document.getElementById('contenedor-imagen');
             const loader = document.getElementById('loader-corazones');
@@ -323,58 +323,67 @@
 
             if (animacionActual) animacionActual.cancel();
             
+            // 1. Limpieza inmediata: ocultamos todo lo anterior
             textoEl.style.opacity = 0;
             contImg.style.opacity = 0;
             viewport.scrollTop = 0;
 
             setTimeout(() => {
+                // 2. Cambiamos colores de fondo mientras está el "negro" o transición
                 const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
                 document.body.style.backgroundColor = combo.bg;
                 document.body.style.color = combo.txt;
 
-                textoEl.innerText = "";
-                textoEl.classList.remove('bienvenida');
-                textoEl.style.display = 'block';
-                textoEl.style.position = "absolute";
-
+                // 3. Mostramos corazones
                 loader.style.opacity = 0.6;
 
                 setTimeout(() => {
+                    // 4. OCULTAMOS corazones antes de mostrar el texto
                     loader.style.opacity = 0;
-                    if (dir !== 0) { 
-                        indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length; 
-                    }
 
-                    const carta = datosCartas[indiceActual];
-                    textoEl.innerText = carta.texto;
+                    // 5. Pequeño delay tras los corazones para que respire la transición
+                    setTimeout(() => {
+                        if (dir !== 0) { 
+                            indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length; 
+                        }
 
-                    const alturaTexto = textoEl.offsetHeight || 500; 
-                    const pixelesPorSegundo = 50; 
-                    const duracionDinamica = ((alturaTexto + window.innerHeight) / pixelesPorSegundo) * 1200;
+                        const carta = datosCartas[indiceActual];
+                        
+                        // Preparamos el contenido pero aún no lo mostramos
+                        textoEl.innerText = carta.texto;
+                        textoEl.classList.remove('bienvenida');
+                        textoEl.style.display = 'block';
+                        textoEl.style.position = "absolute";
 
-                    if (carta.img) {
-                        contImg.style.backgroundImage = `url('${carta.img}')`;
-                        contImg.style.opacity = 0.5; 
-                    }
+                        if (carta.img) {
+                            contImg.style.backgroundImage = `url('${carta.img}')`;
+                            contImg.style.opacity = 0.5; 
+                        }
 
-                    textoEl.style.opacity = 1;
-                    interactuado = true;
+                        // 6. Ahora sí, mostramos el texto y lanzamos animación
+                        textoEl.style.opacity = 1;
+                        interactuado = true;
 
-                    animacionActual = textoEl.animate([
-                        { transform: 'translateY(60vh)' }, 
-                        { transform: 'translateY(-120%)' }
-                    ], { 
-                        duration: duracionDinamica, 
-                        iterations: 1, 
-                        easing: 'linear' 
-                    });
+                        const alturaTexto = textoEl.offsetHeight || 500; 
+                        const pixelesPorSegundo = 50; 
+                        const duracionDinamica = ((alturaTexto + window.innerHeight) / pixelesPorSegundo) * 1200;
 
-                    animacionActual.onfinish = () => {
-                        textoEl.style.position = "relative";
-                        textoEl.style.transform = "none";
-                    };
-                }, 1500);
-            }, 600);
+                        animacionActual = textoEl.animate([
+                            { transform: 'translateY(60vh)' }, 
+                            { transform: 'translateY(-120%)' }
+                        ], { 
+                            duration: duracionDinamica, 
+                            iterations: 1, 
+                            easing: 'linear' 
+                        });
+
+                        animacionActual.onfinish = () => {
+                            textoEl.style.position = "relative";
+                            textoEl.style.transform = "none";
+                        };
+                    }, 400); // Pausa de 400ms después de que se borran los corazones
+                }, 1500); // Duración de los corazones en pantalla
+            }, 600); // Tiempo de espera inicial para limpiar la pantalla
         }
 
         cargarCartas();
