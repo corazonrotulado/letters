@@ -11,10 +11,9 @@
             margin: 0; padding: 0; height: 100%; width: 100%; 
             font-family: 'Playfair Display', serif; overflow: hidden; 
             background-color: #fce4ec; color: #ad1457;
-            transition: background-color 1.2s ease;
+            transition: background-color 2s ease;
         }
 
-        /* TEXTURA POLVO DE ESTRELLAS */
         body::after {
             content: ""; position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
             background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
@@ -22,49 +21,44 @@
         }
 
         #viewport-texto {
-            position: fixed; top: 10vh; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 500px; height: 75vh; z-index: 5;
-            display: flex; flex-direction: column; overflow: hidden;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center; z-index: 5;
         }
 
         #contenedor-texto { 
-            position: absolute; width: 100%; text-align: left; font-size: 1.4rem; 
-            line-height: 2.3; opacity: 0; padding: 20px 25px; pointer-events: none;
-            white-space: pre-wrap;
+            width: 85%; max-width: 600px; text-align: center; font-size: 1.6rem; 
+            line-height: 1.6; opacity: 0; pointer-events: none;
+        }
+
+        /* EFECTO DE APARICIÓN (FADE + SCALE + BLUR) */
+        .frase-latido {
+            position: absolute; width: 85%; left: 50%; top: 50%; transform: translate(-50%, -50%);
+            opacity: 0; filter: blur(10px); text-align: center;
+            animation: aparecer-latido 5s ease-in-out forwards;
+        }
+
+        @keyframes aparecer-latido {
+            0% { opacity: 0; filter: blur(12px); transform: translate(-50%, -50%) scale(0.9); }
+            20% { opacity: 1; filter: blur(0px); transform: translate(-50%, -50%) scale(1); }
+            80% { opacity: 1; filter: blur(0px); transform: translate(-50%, -50%) scale(1.05); }
+            100% { opacity: 0; filter: blur(15px); transform: translate(-50%, -50%) scale(1.1); }
         }
 
         .bienvenida {
-            position: absolute !important; top: 50% !important; transform: translateY(-50%) !important;
-            text-align: center !important; opacity: 1 !important; cursor: pointer; pointer-events: auto !important; 
+            opacity: 1 !important; cursor: pointer; pointer-events: auto !important; font-size: 1.4rem;
         }
 
-        #contenedor-vuelo {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1000; overflow: hidden; display: none;
+        #menu-cartas { 
+            display: none; flex-direction: column; gap: 5px; padding: 80px 20px; 
+            width: 100%; height: 100%; overflow-y: auto; z-index: 20; 
         }
-
-        .palabra-voladora {
-            position: absolute; white-space: nowrap; font-size: 1.8rem; font-style: italic;
-            opacity: 0.9; color: inherit; animation: volar-izq linear forwards;
-            text-shadow: 0 0 10px rgba(255,255,255,0.4);
-        }
-
-        @keyframes volar-izq {
-            from { transform: translateX(115vw); }
-            to { transform: translateX(-160%); }
-        }
-
-        #menu-cartas { display: none; flex-direction: column; gap: 5px; padding: 60px 15px; width: 100%; z-index: 20; overflow-y: auto; height: 100%; }
-        #menu-cartas::-webkit-scrollbar { display: none; }
-        .boton-carta { padding: 18px 0; cursor: pointer; font-size: 1.1rem; text-align: left; border-bottom: 0.5px solid rgba(173, 20, 87, 0.15); opacity: 0.8; }
+        .boton-carta { padding: 18px 0; cursor: pointer; font-size: 1.1rem; border-bottom: 0.5px solid rgba(173, 20, 87, 0.1); }
         
         .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
         .izq { left: 0; } .der { right: 0; }
     </style>
 </head>
 <body>
-
-    <div id="contenedor-vuelo"></div>
 
     <div id="controles-navegacion">
         <div class="zona-click izq" onclick="regresarAlMenu()"></div>
@@ -92,65 +86,57 @@
                     texto: row.c[0] ? String(row.c[0].v) : "",
                     titulo: row.c[2] ? String(row.c[2].v) : "Sin título"
                 }));
-            } catch (e) { console.error("Error de conexión"); }
+            } catch (e) { console.error("Error cargando Excel"); }
         }
 
-        function lanzarVuelo(fraseCompleta) {
-            const cont = document.getElementById('contenedor-vuelo');
-            cont.style.display = 'block';
-            cont.innerHTML = '';
+        function secuenciaFrases(textoCompleto) {
+            const viewport = document.getElementById('viewport-texto');
+            // Separamos por el guion y quitamos las comillas si las hay
+            const frases = textoCompleto.split('-').map(f => f.trim().replace(/"/g, ""));
             
-            // Divide las palabras por el guion
-            const trozos = fraseCompleta.split('-').map(p => p.trim()).filter(p => p !== "");
-            
-            if (trozos.length === 0) {
-                console.log("No hay palabras para volar");
-                return;
-            }
+            document.body.style.backgroundColor = "#2d0a16"; // Fondo más íntimo
+            document.body.style.color = "#fce4ec";
 
-            trozos.forEach((palabra, i) => {
+            frases.forEach((frase, i) => {
                 setTimeout(() => {
-                    const span = document.createElement('span');
-                    span.className = 'palabra-voladora';
-                    span.innerText = palabra;
-                    span.style.top = (Math.random() * 65 + 15) + "vh"; // Altura aleatoria
-                    const duracion = Math.random() * 3 + 6; // Entre 6 y 9 segundos
-                    span.style.animationDuration = duracion + "s";
-                    cont.appendChild(span);
+                    const span = document.createElement('div');
+                    span.className = 'frase-latido';
+                    span.innerText = frase;
+                    viewport.appendChild(span);
                     
-                    // Limpieza
-                    setTimeout(() => span.remove(), duracion * 1000);
-                }, i * 950); // Sale una palabra cada segundo aprox
+                    // Borrar el elemento después de que termine la animación
+                    setTimeout(() => span.remove(), 5000);
+                }, i * 4500); // Aparecen una tras otra con un solapamiento suave
             });
         }
 
         function cambiarCarta(dir) {
             if (animacionActual) animacionActual.cancel();
             const txtEl = document.getElementById('contenedor-texto');
-            const contVuelo = document.getElementById('contenedor-vuelo');
+            const viewport = document.getElementById('viewport-texto');
             
+            // Limpiar frases anteriores
+            document.querySelectorAll('.frase-latido').forEach(f => f.remove());
             txtEl.style.opacity = 0;
-            contVuelo.style.display = 'none';
-            contVuelo.innerHTML = '';
 
             setTimeout(() => {
                 indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length;
                 const carta = datosCartas[indiceActual];
-                
-                // LIMPIEZA TOTAL: Pasa a minúsculas y quita cualquier tilde o espacio raro
                 const tituloID = String(carta.titulo).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 
                 if (tituloID === "corazon rotulado") {
-                    txtEl.innerText = ""; 
-                    lanzarVuelo(carta.texto);
+                    txtEl.innerText = "";
+                    secuenciaFrases(carta.texto);
                 } else {
+                    document.body.style.backgroundColor = "#fce4ec";
+                    document.body.style.color = "#ad1457";
                     txtEl.innerText = carta.texto;
                     txtEl.style.opacity = 1;
-                    const dur = ((txtEl.offsetHeight + window.innerHeight) / 50) * 1200;
-                    animacionActual = txtEl.animate([{ transform: 'translateY(65vh)' }, { transform: 'translateY(-130%)' }], 
-                        { duration: Math.max(dur, 7000), iterations: 1, easing: 'linear' });
+                    const dur = ((txtEl.offsetHeight + window.innerHeight) / 50) * 1500;
+                    animacionActual = txtEl.animate([{ transform: 'translateY(70vh)' }, { transform: 'translateY(-140%)' }], 
+                        { duration: Math.max(dur, 8000), iterations: 1, easing: 'linear' });
                 }
-            }, 300);
+            }, 400);
         }
 
         function iniciar() {
