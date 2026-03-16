@@ -6,6 +6,7 @@
     <title>corazón rotulado</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <style>
+        /* RESET GENERAL */
         * { box-sizing: border-box; }
         
         body, html { 
@@ -13,9 +14,10 @@
             height: 100%; width: 100%; 
             font-family: 'Playfair Display', serif;
             overflow: hidden; 
-            transition: background-color 1.5s ease, color 1.5s ease;
-            background-color: #0a0a0a;
-            color: #ff00ff;
+            /* Transición más rápida para que se note el cambio de color */
+            transition: background-color 0.8s ease, color 0.8s ease;
+            background-color: #0a0a0a; /* Fondo inicial NEGRO */
+            color: #39ff14; /* Texto inicial VERDE NEÓN */
             user-select: none; 
             -webkit-user-select: none;
         }
@@ -46,12 +48,13 @@
             width: 85%; height: 85%;
             z-index: 1;
             opacity: 0;
-            transition: opacity 1.5s ease;
+            transition: opacity 1s ease;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             mix-blend-mode: screen; 
-            filter: brightness(1.2) contrast(1.2) saturate(2);
+            /* Quitamos el SEPIA para que no se vea rosa/naranja */
+            filter: contrast(1.2) brightness(1.1) saturate(1.5);
         }
 
         #viewport-texto {
@@ -81,32 +84,26 @@
             padding: 80px 10px;
             width: 100%;
             opacity: 0;
-            transition: opacity 1s ease;
+            transition: opacity 0.5s ease;
             z-index: 20;
-            flex-shrink: 0;
         }
 
         .boton-carta {
             padding: 12px 0;
             cursor: pointer;
             font-size: 1.1rem;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             text-align: left;
             display: flex;
             align-items: baseline;
             pointer-events: auto;
-        }
-
-        .boton-carta span.numero {
-            font-size: 0.8rem;
-            margin-right: 15px;
-            opacity: 0.5;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
         .boton-carta:hover {
             opacity: 1;
-            padding-left: 12px;
-            background: rgba(255, 255, 255, 0.05);
+            padding-left: 15px;
+            background: rgba(255, 255, 255, 0.08);
         }
 
         #contenedor-texto { 
@@ -139,21 +136,12 @@
             width: 100%;
             text-align: center;
             font-size: 0.65rem;
-            letter-spacing: 0.3px;
             z-index: 100;
-            opacity: 0.7;
-            line-height: 1.6;
-            transition: color 1.5s ease;
+            opacity: 0.6;
+            transition: color 0.8s ease;
         }
 
-        #footer a {
-            color: inherit;
-            text-decoration: none;
-            border-bottom: 0.3px solid currentColor;
-            transition: opacity 0.3s ease;
-        }
-
-        #footer a:hover { opacity: 0.5; }
+        #footer a { color: inherit; text-decoration: underline; }
 
         #loader-corazones {
             position: fixed;
@@ -162,18 +150,18 @@
             font-size: 5rem;
             opacity: 0;
             z-index: 1000;
-            transition: opacity 0.4s ease, color 0.5s ease;
-            filter: blur(2px) contrast(150%);
+            transition: opacity 0.3s ease;
+            filter: contrast(150%);
             letter-spacing: 15px;
             pointer-events: none;
         }
 
+        /* EFECTO PARPADEO NEÓN */
         @keyframes flicker {
-            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 0.8; }
-            20%, 22%, 24%, 55% { opacity: 0.2; }
+            0%, 18%, 22%, 25%, 53%, 57%, 100% { opacity: 0.8; }
+            20%, 24%, 55% { opacity: 0.1; }
         }
-
-        .flicker-active { animation: flicker 2s infinite; }
+        .flicker-active { animation: flicker 1.5s infinite; }
 
         .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
         .izq { left: 0; } .der { right: 0; }
@@ -203,18 +191,17 @@
         const S_ID = "1kDWsxPSkUCAYrhr2dUG1gujmiSGo2Crcf36D4TB75js"; 
         let datosCartas = [];
         let indiceActual = -1;
-        let interactuado = false;
         let animacionActual = null;
         let msPresionado = 0;
-        let estaPausado = false;
         let datosListos = false;
 
+        // COMBINACIONES ESTILO 2008 (Oscuras + Neón)
         const combinaciones = [
-            { bg: "#121212", txt: "#39ff14" }, // Toxic Green
-            { bg: "#0a0a0a", txt: "#ff00ff" }, // Scene Pink
-            { bg: "#1a1a1a", txt: "#00f3ff" }, // Cyber Cyan
-            { bg: "#111111", txt: "#ff073a" }, // Vampire Red
-            { bg: "#050505", txt: "#ccff00" }  // Electric Lime
+            { bg: "#0d0d0d", txt: "#39ff14" }, // Verde Neón
+            { bg: "#050505", txt: "#ff00ff" }, // Magenta/Rosa Fucsia
+            { bg: "#111111", txt: "#00f3ff" }, // Cian Eléctrico
+            { bg: "#0a0a0a", txt: "#ff073a" }, // Rojo Radical
+            { bg: "#080808", txt: "#ccff00" }  // Lima Eléctrica
         ];
 
         async function cargarCartas() {
@@ -234,10 +221,6 @@
 
         function iniciarDesdeBienvenida() {
             if (!datosListos) return;
-            secuenciaEntrada();
-        }
-
-        function secuenciaEntrada() {
             const bienvenidaEl = document.getElementById('contenedor-texto');
             const loader = document.getElementById('loader-corazones');
             
@@ -252,25 +235,22 @@
                     loader.style.opacity = 0;
                     loader.classList.remove('flicker-active');
                     generarMenu();
-                }, 1500);
-            }, 800);
+                }, 1200);
+            }, 500);
         }
 
         function generarMenu() {
             const menuEl = document.getElementById('menu-cartas');
             const contImg = document.getElementById('contenedor-imagen');
             const textoEl = document.getElementById('contenedor-texto');
-            const viewport = document.getElementById('viewport-texto');
             
             document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
             if (animacionActual) animacionActual.cancel();
             
-            interactuado = false;
             textoEl.style.opacity = 0;
             textoEl.style.display = 'none';
             contImg.style.opacity = 0;
             
-            viewport.scrollTop = 0;
             menuEl.innerHTML = ""; 
             menuEl.style.display = 'flex';
             
@@ -300,7 +280,7 @@
                 loader.style.opacity = 0;
                 loader.classList.remove('flicker-active');
                 generarMenu();
-            }, 1000);
+            }, 800);
         }
 
         function seleccionarCarta(index) {
@@ -310,17 +290,14 @@
                 document.getElementById('menu-cartas').style.display = 'none';
                 document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'block');
                 cambiarCarta(0); 
-            }, 500);
+            }, 300);
         }
 
-        function pausar() {
-            if (animacionActual) { animacionActual.pause(); estaPausado = true; msPresionado = Date.now(); }
-        }
+        function pausar() { if (animacionActual) { animacionActual.pause(); msPresionado = Date.now(); } }
 
         function reanudar(dir) {
             if ((Date.now() - msPresionado) < 250) { cambiarCarta(dir); } 
             else if (animacionActual) { animacionActual.play(); }
-            estaPausado = false;
         }
 
         function cambiarCarta(dir) {
@@ -354,7 +331,6 @@
                         }
 
                         const carta = datosCartas[indiceActual];
-                        
                         textoEl.innerText = carta.texto;
                         textoEl.classList.remove('bienvenida');
                         textoEl.style.display = 'block';
@@ -366,28 +342,22 @@
                         }
 
                         textoEl.style.opacity = 1;
-                        interactuado = true;
-
                         const alturaTexto = textoEl.offsetHeight || 500; 
-                        const pixelesPorSegundo = 50; 
-                        const duracionDinamica = ((alturaTexto + window.innerHeight) / pixelesPorSegundo) * 1200;
+                        const pixelesPorSegundo = 55; 
+                        const duracionDinamica = ((alturaTexto + window.innerHeight) / pixelesPorSegundo) * 1000;
 
                         animacionActual = textoEl.animate([
-                            { transform: 'translateY(65vh)' }, 
-                            { transform: 'translateY(-125%)' }
-                        ], { 
-                            duration: duracionDinamica, 
-                            iterations: 1, 
-                            easing: 'linear' 
-                        });
+                            { transform: 'translateY(70vh)' }, 
+                            { transform: 'translateY(-130%)' }
+                        ], { duration: duracionDinamica, iterations: 1, easing: 'linear' });
 
                         animacionActual.onfinish = () => {
                             textoEl.style.position = "relative";
                             textoEl.style.transform = "none";
                         };
-                    }, 400);
-                }, 1200);
-            }, 500);
+                    }, 300);
+                }, 1000);
+            }, 400);
         }
 
         cargarCartas();
