@@ -14,8 +14,8 @@
             font-family: 'Playfair Display', serif;
             overflow: hidden; 
             transition: background-color 1.5s ease, color 1.5s ease;
-            background-color: #fce4ec;
-            color: #ad1457;
+            background-color: #0a0a0a;
+            color: #ff00ff;
             user-select: none; 
             -webkit-user-select: none;
         }
@@ -27,7 +27,7 @@
             top: -50%; left: -50%;
             width: 200%; height: 200%;
             background-image: url("https://www.transparenttextures.com/patterns/stardust.png");
-            opacity: 0.1;
+            opacity: 0.15;
             z-index: 999;
             pointer-events: none;
             animation: grain-jump 0.6s steps(8) infinite;
@@ -51,7 +51,7 @@
             background-repeat: no-repeat;
             background-position: center;
             mix-blend-mode: screen; 
-            filter: contrast(1.5) brightness(0.8) sepia(1) saturate(5);
+            filter: brightness(1.2) contrast(1.2) saturate(2);
         }
 
         #viewport-texto {
@@ -61,26 +61,24 @@
             transform: translateX(-50%);
             width: 90%; 
             max-width: 500px;
-            height: 70vh; /* Ajustado para mejor visibilidad */
+            height: 70vh;
             z-index: 5;
-            overflow-y: auto; /* Permite el scroll */
+            overflow-y: auto;
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
-            /* Máscara suavizada */
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             scroll-behavior: smooth;
         }
 
-        /* Ocultar scrollbar pero mantener funcionalidad */
         #viewport-texto::-webkit-scrollbar { display: none; }
 
         #menu-cartas {
             display: none;
             flex-direction: column;
             gap: 4px;
-            padding: 80px 10px; /* Padding extra para que el degradado no tape el texto al inicio/final */
+            padding: 80px 10px;
             width: 100%;
             opacity: 0;
             transition: opacity 1s ease;
@@ -106,8 +104,9 @@
         }
 
         .boton-carta:hover {
-            opacity: 0.6;
-            padding-left: 8px;
+            opacity: 1;
+            padding-left: 12px;
+            background: rgba(255, 255, 255, 0.05);
         }
 
         #contenedor-texto { 
@@ -163,11 +162,18 @@
             font-size: 5rem;
             opacity: 0;
             z-index: 1000;
-            transition: opacity 0.4s ease, color 2.0s ease;
-            filter: blur(4px) contrast(180%);
+            transition: opacity 0.4s ease, color 0.5s ease;
+            filter: blur(2px) contrast(150%);
             letter-spacing: 15px;
             pointer-events: none;
         }
+
+        @keyframes flicker {
+            0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% { opacity: 0.8; }
+            20%, 22%, 24%, 55% { opacity: 0.2; }
+        }
+
+        .flicker-active { animation: flicker 2s infinite; }
 
         .zona-click { position: fixed; top: 0; height: 100%; width: 50%; z-index: 10; cursor: pointer; display: none; }
         .izq { left: 0; } .der { right: 0; }
@@ -204,11 +210,11 @@
         let datosListos = false;
 
         const combinaciones = [
-            { bg: "#fce4ec", txt: "#ad1457" }, 
-            { bg: "#e8eaf6", txt: "#283593" }, 
-            { bg: "#e0f2f1", txt: "#00695c" }, 
-            { bg: "#f1f8e9", txt: "#33691e" }, 
-            { bg: "#fff3e0", txt: "#e65100" }
+            { bg: "#121212", txt: "#39ff14" }, // Toxic Green
+            { bg: "#0a0a0a", txt: "#ff00ff" }, // Scene Pink
+            { bg: "#1a1a1a", txt: "#00f3ff" }, // Cyber Cyan
+            { bg: "#111111", txt: "#ff073a" }, // Vampire Red
+            { bg: "#050505", txt: "#ccff00" }  // Electric Lime
         ];
 
         async function cargarCartas() {
@@ -240,9 +246,11 @@
 
             setTimeout(() => {
                 bienvenidaEl.style.display = 'none';
-                loader.style.opacity = 0.6;
+                loader.classList.add('flicker-active');
+                loader.style.opacity = 0.8;
                 setTimeout(() => {
                     loader.style.opacity = 0;
+                    loader.classList.remove('flicker-active');
                     generarMenu();
                 }, 1500);
             }, 800);
@@ -257,13 +265,11 @@
             document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
             if (animacionActual) animacionActual.cancel();
             
-            // Reset de estados
             interactuado = false;
             textoEl.style.opacity = 0;
             textoEl.style.display = 'none';
             contImg.style.opacity = 0;
             
-            // Limpiar y resetear scroll
             viewport.scrollTop = 0;
             menuEl.innerHTML = ""; 
             menuEl.style.display = 'flex';
@@ -288,9 +294,11 @@
             textoEl.style.opacity = 0;
             contImg.style.opacity = 0;
 
-            loader.style.opacity = 0.6;
+            loader.classList.add('flicker-active');
+            loader.style.opacity = 0.8;
             setTimeout(() => {
                 loader.style.opacity = 0;
+                loader.classList.remove('flicker-active');
                 generarMenu();
             }, 1000);
         }
@@ -315,7 +323,7 @@
             estaPausado = false;
         }
 
-function cambiarCarta(dir) {
+        function cambiarCarta(dir) {
             const textoEl = document.getElementById('contenedor-texto');
             const contImg = document.getElementById('contenedor-imagen');
             const loader = document.getElementById('loader-corazones');
@@ -323,25 +331,23 @@ function cambiarCarta(dir) {
 
             if (animacionActual) animacionActual.cancel();
             
-            // 1. Limpieza inmediata: ocultamos todo lo anterior
             textoEl.style.opacity = 0;
             contImg.style.opacity = 0;
             viewport.scrollTop = 0;
 
             setTimeout(() => {
-                // 2. Cambiamos colores de fondo mientras está el "negro" o transición
                 const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
                 document.body.style.backgroundColor = combo.bg;
                 document.body.style.color = combo.txt;
 
-                // 3. Mostramos corazones
-                loader.style.opacity = 0.6;
+                loader.style.color = combo.txt;
+                loader.classList.add('flicker-active');
+                loader.style.opacity = 0.8;
 
                 setTimeout(() => {
-                    // 4. OCULTAMOS corazones antes de mostrar el texto
                     loader.style.opacity = 0;
+                    loader.classList.remove('flicker-active');
 
-                    // 5. Pequeño delay tras los corazones para que respire la transición
                     setTimeout(() => {
                         if (dir !== 0) { 
                             indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length; 
@@ -349,7 +355,6 @@ function cambiarCarta(dir) {
 
                         const carta = datosCartas[indiceActual];
                         
-                        // Preparamos el contenido pero aún no lo mostramos
                         textoEl.innerText = carta.texto;
                         textoEl.classList.remove('bienvenida');
                         textoEl.style.display = 'block';
@@ -357,10 +362,9 @@ function cambiarCarta(dir) {
 
                         if (carta.img) {
                             contImg.style.backgroundImage = `url('${carta.img}')`;
-                            contImg.style.opacity = 0.5; 
+                            contImg.style.opacity = 0.6; 
                         }
 
-                        // 6. Ahora sí, mostramos el texto y lanzamos animación
                         textoEl.style.opacity = 1;
                         interactuado = true;
 
@@ -369,8 +373,8 @@ function cambiarCarta(dir) {
                         const duracionDinamica = ((alturaTexto + window.innerHeight) / pixelesPorSegundo) * 1200;
 
                         animacionActual = textoEl.animate([
-                            { transform: 'translateY(60vh)' }, 
-                            { transform: 'translateY(-120%)' }
+                            { transform: 'translateY(65vh)' }, 
+                            { transform: 'translateY(-125%)' }
                         ], { 
                             duration: duracionDinamica, 
                             iterations: 1, 
@@ -381,9 +385,9 @@ function cambiarCarta(dir) {
                             textoEl.style.position = "relative";
                             textoEl.style.transform = "none";
                         };
-                    }, 400); // Pausa de 400ms después de que se borran los corazones
-                }, 1500); // Duración de los corazones en pantalla
-            }, 600); // Tiempo de espera inicial para limpiar la pantalla
+                    }, 400);
+                }, 1200);
+            }, 500);
         }
 
         cargarCartas();
