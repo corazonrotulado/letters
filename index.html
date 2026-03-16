@@ -14,8 +14,8 @@
             font-family: 'Playfair Display', serif;
             overflow: hidden; 
             transition: background-color 1.5s ease, color 1.5s ease;
-            background-color: #666666; /* Gris Oscuro */
-            color: #d2ff27; /* Verde Neón */
+            background-color: #fce4ec;
+            color: #ad1457;
             user-select: none; 
             -webkit-user-select: none;
         }
@@ -46,12 +46,12 @@
             width: 85%; height: 85%;
             z-index: 1;
             opacity: 0;
-            transition: opacity 1.5s ease, filter 1.5s ease;
+            transition: opacity 1.5s ease;
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
             mix-blend-mode: screen; 
-            filter: contrast(1.5) brightness(0.8) saturate(2);
+            filter: contrast(1.5) brightness(0.8) sepia(1) saturate(5);
         }
 
         #viewport-texto {
@@ -61,24 +61,26 @@
             transform: translateX(-50%);
             width: 90%; 
             max-width: 500px;
-            height: 70vh; 
+            height: 70vh; /* Ajustado para mejor visibilidad */
             z-index: 5;
-            overflow-y: auto; 
+            overflow-y: auto; /* Permite el scroll */
             overflow-x: hidden;
             display: flex;
             flex-direction: column;
+            /* Máscara suavizada */
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             mask-image: linear-gradient(to bottom, transparent, black 15%, black 85%, transparent);
             scroll-behavior: smooth;
         }
 
+        /* Ocultar scrollbar pero mantener funcionalidad */
         #viewport-texto::-webkit-scrollbar { display: none; }
 
         #menu-cartas {
             display: none;
             flex-direction: column;
             gap: 4px;
-            padding: 80px 10px;
+            padding: 80px 10px; /* Padding extra para que el degradado no tape el texto al inicio/final */
             width: 100%;
             opacity: 0;
             transition: opacity 1s ease;
@@ -201,12 +203,12 @@
         let estaPausado = false;
         let datosListos = false;
 
-        // PALETA ACTUALIZADA CON TUS COLORES Y COMPLEMENTARIOS
         const combinaciones = [
-            { bg: "#666666", txt: "#d2ff27", filter: "hue-rotate(60deg) saturate(3)" }, // Gris oscuro + Verde neón
-            { bg: "#1a1a1a", txt: "#ff2781", filter: "hue-rotate(300deg) saturate(3)" }, // Negro + Rosa Neón
-            { bg: "#d2ff27", txt: "#666666", filter: "invert(1) contrast(2)" }, // Verde Neón + Gris (Complementario)
-            { bg: "#ff2781", txt: "#1a1a1a", filter: "grayscale(1) contrast(3)" }  // Rosa Neón + Negro (Complementario)
+            { bg: "#fce4ec", txt: "#ad1457" }, 
+            { bg: "#e8eaf6", txt: "#283593" }, 
+            { bg: "#e0f2f1", txt: "#00695c" }, 
+            { bg: "#f1f8e9", txt: "#33691e" }, 
+            { bg: "#fff3e0", txt: "#e65100" }
         ];
 
         async function cargarCartas() {
@@ -232,8 +234,10 @@
         function secuenciaEntrada() {
             const bienvenidaEl = document.getElementById('contenedor-texto');
             const loader = document.getElementById('loader-corazones');
+            
             bienvenidaEl.style.opacity = 0;
             bienvenidaEl.style.pointerEvents = 'none';
+
             setTimeout(() => {
                 bienvenidaEl.style.display = 'none';
                 loader.style.opacity = 0.6;
@@ -249,15 +253,21 @@
             const contImg = document.getElementById('contenedor-imagen');
             const textoEl = document.getElementById('contenedor-texto');
             const viewport = document.getElementById('viewport-texto');
+            
             document.querySelectorAll('.zona-click').forEach(el => el.style.display = 'none');
             if (animacionActual) animacionActual.cancel();
+            
+            // Reset de estados
             interactuado = false;
             textoEl.style.opacity = 0;
             textoEl.style.display = 'none';
             contImg.style.opacity = 0;
+            
+            // Limpiar y resetear scroll
             viewport.scrollTop = 0;
             menuEl.innerHTML = ""; 
             menuEl.style.display = 'flex';
+            
             datosCartas.forEach((carta, i) => {
                 const btn = document.createElement('div');
                 btn.className = 'boton-carta';
@@ -265,6 +275,7 @@
                 btn.onclick = (e) => { e.stopPropagation(); seleccionarCarta(i); };
                 menuEl.appendChild(btn);
             });
+            
             setTimeout(() => menuEl.style.opacity = 1, 50);
         }
 
@@ -272,9 +283,11 @@
             const loader = document.getElementById('loader-corazones');
             const textoEl = document.getElementById('contenedor-texto');
             const contImg = document.getElementById('contenedor-imagen');
+            
             if (animacionActual) animacionActual.cancel();
             textoEl.style.opacity = 0;
             contImg.style.opacity = 0;
+
             loader.style.opacity = 0.6;
             setTimeout(() => {
                 loader.style.opacity = 0;
@@ -302,30 +315,41 @@
             estaPausado = false;
         }
 
-        function cambiarCarta(dir) {
+function cambiarCarta(dir) {
             const textoEl = document.getElementById('contenedor-texto');
             const contImg = document.getElementById('contenedor-imagen');
             const loader = document.getElementById('loader-corazones');
             const viewport = document.getElementById('viewport-texto');
+
             if (animacionActual) animacionActual.cancel();
+            
+            // 1. Limpieza inmediata: ocultamos todo lo anterior
             textoEl.style.opacity = 0;
             contImg.style.opacity = 0;
             viewport.scrollTop = 0;
 
             setTimeout(() => {
+                // 2. Cambiamos colores de fondo mientras está el "negro" o transición
                 const combo = combinaciones[Math.floor(Math.random() * combinaciones.length)];
                 document.body.style.backgroundColor = combo.bg;
                 document.body.style.color = combo.txt;
-                contImg.style.filter = `contrast(1.5) brightness(0.8) ${combo.filter}`;
+
+                // 3. Mostramos corazones
                 loader.style.opacity = 0.6;
 
                 setTimeout(() => {
+                    // 4. OCULTAMOS corazones antes de mostrar el texto
                     loader.style.opacity = 0;
+
+                    // 5. Pequeño delay tras los corazones para que respire la transición
                     setTimeout(() => {
                         if (dir !== 0) { 
                             indiceActual = (indiceActual + dir + datosCartas.length) % datosCartas.length; 
                         }
+
                         const carta = datosCartas[indiceActual];
+                        
+                        // Preparamos el contenido pero aún no lo mostramos
                         textoEl.innerText = carta.texto;
                         textoEl.classList.remove('bienvenida');
                         textoEl.style.display = 'block';
@@ -336,8 +360,10 @@
                             contImg.style.opacity = 0.5; 
                         }
 
+                        // 6. Ahora sí, mostramos el texto y lanzamos animación
                         textoEl.style.opacity = 1;
                         interactuado = true;
+
                         const alturaTexto = textoEl.offsetHeight || 500; 
                         const pixelesPorSegundo = 50; 
                         const duracionDinamica = ((alturaTexto + window.innerHeight) / pixelesPorSegundo) * 1200;
@@ -345,15 +371,19 @@
                         animacionActual = textoEl.animate([
                             { transform: 'translateY(60vh)' }, 
                             { transform: 'translateY(-120%)' }
-                        ], { duration: duracionDinamica, iterations: 1, easing: 'linear' });
+                        ], { 
+                            duration: duracionDinamica, 
+                            iterations: 1, 
+                            easing: 'linear' 
+                        });
 
                         animacionActual.onfinish = () => {
                             textoEl.style.position = "relative";
                             textoEl.style.transform = "none";
                         };
-                    }, 400);
-                }, 1500);
-            }, 600);
+                    }, 400); // Pausa de 400ms después de que se borran los corazones
+                }, 1500); // Duración de los corazones en pantalla
+            }, 600); // Tiempo de espera inicial para limpiar la pantalla
         }
 
         cargarCartas();
